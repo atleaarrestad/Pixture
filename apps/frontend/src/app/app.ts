@@ -7,7 +7,7 @@ import { UiCheckboxComponent } from './ui/ui-checkbox.component';
 import { UiComboboxComponent } from './ui/ui-combobox.component';
 import { UiInputComponent } from './ui/ui-input.component';
 import { UiSelectComponent } from './ui/ui-select.component';
-import { UiSpinnerComponent } from './ui/ui-spinner.component';
+import { UiSpinnerComponent, UiSpinnerVariant } from './ui/ui-spinner.component';
 import { UiTabsComponent } from './ui/ui-tabs.component';
 import { UiTextareaComponent } from './ui/ui-textarea.component';
 import { UiToastStackComponent } from './ui/ui-toast-stack.component';
@@ -114,6 +114,63 @@ export class App {
             caption: 'How future work should behave',
             content:
                 'Use shared primitives first. If something is missing, extend the library in a reusable way and document it in the repository instructions.',
+        },
+    ];
+
+    protected readonly spinnerOptions: Array<{
+        label: string;
+        variant: UiSpinnerVariant;
+        description: string;
+    }> = [
+        {
+            label: 'Tiles',
+            variant: 'tiles',
+            description: 'Chunky pastel blocks trading places inside a wobbling frame.',
+        },
+        {
+            label: 'Orbit',
+            variant: 'orbit',
+            description: 'A circular orbit spinner with four little satellites.',
+        },
+        {
+            label: 'Conveyor',
+            variant: 'conveyor',
+            description: 'Tiles traveling across a chunky loading rail.',
+        },
+        {
+            label: 'Spring',
+            variant: 'spring',
+            description: 'Four blocks bouncing like a toy spring rack.',
+        },
+        {
+            label: 'Stamps',
+            variant: 'stamps',
+            description: 'Pastel stamps hopping around the card corners.',
+        },
+        {
+            label: 'Checker',
+            variant: 'checker',
+            description: 'A mini checkerboard pulsing in alternating beats.',
+        },
+        {
+            label: 'Ladder',
+            variant: 'ladder',
+            description: 'A rising stair-step loader with chunky bars.',
+        },
+        {
+            label: 'Burst',
+            variant: 'burst',
+            description: 'A center-packed burst that pops outward and back in.',
+        },
+        {
+            label: 'Satellite',
+            variant: 'satellite',
+            description: 'A central block with wobbling companions around it.',
+        },
+        {
+            label: 'Pulse',
+            variant: 'pulse',
+            description: 'A tightening and releasing frame with corner punches.',
         },
     ];
 
