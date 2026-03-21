@@ -1,0 +1,133 @@
+<main class="editor-page">
+    @if (isLoading()) {
+        <div class="editor-page__loading">
+            <ui-spinner label="Loading reservation editor" size="lg" />
+        </div>
+    } @else if (loadError()) {
+        <section class="editor-page__error">
+            <ui-card title="Editor unavailable" subtitle="{{ loadError() }}" tone="tertiary">
+                <a routerLink="/" class="editor-page__link-button">Back to board</a>
+            </ui-card>
+        </section>
+    } @else if (editor(); as editor) {
+        <section class="editor-page__hero">
+            <div>
+                <p class="editor-page__eyebrow">Reservation editor</p>
+                <h1>{{ editor.title }}</h1>
+                <p>
+                    Edit only the pixels inside your reserved area. This prototype keeps the edit surface
+                    local to the rectangle and pushes only changed pixels back to the backend.
+                </p>
+            </div>
+
+            <div class="editor-page__hero-actions">
+                <a routerLink="/" class="editor-page__link-button">Back to board</a>
+                <ui-button
+                    variant="secondary"
+                    [disabled]="dirtyPixelCount() === 0 || isSaving()"
+                    (pressed)="save()"
+                >
+                    @if (isSaving()) {
+                        <ui-spinner size="sm" />
+                    }
+                    Save changes
+                </ui-button>
+            </div>
+        </section>
+
+        <section class="editor-page__grid">
+            <ui-card
+                class="editor-page__canvas-card"
+                eyebrow="Canvas"
+                title="Pixel workspace"
+                subtitle="Reservation {{ editor.width }} x {{ editor.height }} at {{ editor.x }}, {{ editor.y }}"
+            >
+                <div class="editor-toolbar">
+                    <label class="editor-toolbar__field">
+                        <span>Brush color</span>
+                        <input
+                            type="color"
+                            [ngModel]="selectedColor()"
+                            (ngModelChange)="selectedColor.set($event)"
+                        />
+                    </label>
+
+                    <div class="editor-toolbar__zoom">
+                        <span>Zoom</span>
+                        <div class="editor-toolbar__zoom-actions">
+                            @for (zoomOption of [12, 18, 24]; track zoomOption) {
+                                <button
+                                    type="button"
+                                    class="editor-toolbar__zoom-button"
+                                    [class.editor-toolbar__zoom-button--active]="zoom() === zoomOption"
+                                    (click)="setZoom(zoomOption)"
+                                >
+                                    {{ zoomOption }}x
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="editor-stage">
+                    <canvas
+                        #editorCanvas
+                        class="editor-stage__canvas"
+                        (mousedown)="beginPaint($event)"
+                        (mousemove)="paintWhileDragging($event)"
+                        (mouseup)="endPaint()"
+                        (mouseleave)="endPaint()"
+                    ></canvas>
+                </div>
+            </ui-card>
+
+            <div class="editor-page__sidebar">
+                <ui-card
+                    eyebrow="Status"
+                    title="Editing details"
+                    subtitle="Useful context while you paint"
+                >
+                    <dl class="editor-details">
+                        <div>
+                            <dt>Owner</dt>
+                            <dd>{{ editor.ownerDisplayName }}</dd>
+                        </div>
+                        <div>
+                            <dt>Canvas size</dt>
+                            <dd>{{ editor.canvasWidth }} x {{ editor.canvasHeight }}</dd>
+                        </div>
+                        <div>
+                            <dt>Reservation size</dt>
+                            <dd>{{ editor.width }} x {{ editor.height }}</dd>
+                        </div>
+                        <div>
+                            <dt>Dirty pixels</dt>
+                            <dd>{{ dirtyPixelCount() }}</dd>
+                        </div>
+                        <div>
+                            <dt>Render version</dt>
+                            <dd>{{ editor.renderVersion }}</dd>
+                        </div>
+                    </dl>
+
+                    @if (saveMessage()) {
+                        <p class="editor-page__message">{{ saveMessage() }}</p>
+                    }
+                </ui-card>
+
+                <ui-card
+                    eyebrow="Prototype notes"
+                    title="What this MVP proves"
+                    subtitle="Enough structure to build the real marketplace flow next"
+                    tone="accent"
+                >
+                    <ul class="editor-notes">
+                        <li>Reservation bounds are enforced server-side.</li>
+                        <li>Only changed pixels are sent during save.</li>
+                        <li>The public board image gets a fresh render version after writes.</li>
+                    </ul>
+                </ui-card>
+            </div>
+        </section>
+    }
+</main>

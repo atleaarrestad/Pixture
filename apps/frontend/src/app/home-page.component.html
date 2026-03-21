@@ -1,0 +1,133 @@
+<main class="home-page">
+    @if (isLoading()) {
+        <section class="home-page__loading">
+            <ui-spinner label="Loading board" size="lg" />
+        </section>
+    } @else if (loadError()) {
+        <section class="home-page__error">
+            <ui-card title="Board unavailable" subtitle="{{ loadError() }}" tone="tertiary"></ui-card>
+        </section>
+    } @else if (canvas(); as canvas) {
+        <section class="home-page__hero">
+            <div class="home-page__hero-copy">
+                <p class="home-page__eyebrow">Public board prototype</p>
+                <h1>Backend-rendered board, frontend overlays, canvas-based editing.</h1>
+                <p>
+                    The image is the canonical render from the API. Reservation rectangles are layered on top
+                    so the public page can still hover, inspect, and jump into editing without rebuilding the
+                    whole board in the browser.
+                </p>
+            </div>
+
+            <ui-card
+                eyebrow="Live stats"
+                title="Current board"
+                subtitle="A small in-memory seed dataset to prove the flow"
+            >
+                <dl class="home-page__stats">
+                    <div>
+                        <dt>Canvas</dt>
+                        <dd>{{ canvas.width }} x {{ canvas.height }}</dd>
+                    </div>
+                    <div>
+                        <dt>Reservations</dt>
+                        <dd>{{ canvas.reservationCount }}</dd>
+                    </div>
+                    <div>
+                        <dt>Render</dt>
+                        <dd>{{ canvas.renderVersion }}</dd>
+                    </div>
+                </dl>
+            </ui-card>
+        </section>
+
+        <section class="home-page__layout">
+            <ui-card
+                class="home-page__board-card"
+                eyebrow="Board"
+                title="Public canvas"
+                subtitle="Hover a region to inspect it, then open the reservation editor"
+            >
+                <div
+                    class="board-stage"
+                    [style.aspect-ratio]="canvas.width + ' / ' + canvas.height"
+                >
+                    <img
+                        class="board-stage__image"
+                        [src]="imageUrl()"
+                        [alt]="'Pixture board render ' + canvas.renderVersion"
+                    />
+
+                    <div class="board-stage__overlays">
+                        @for (reservation of reservations(); track reservation.reservationId) {
+                            <button
+                                type="button"
+                                class="board-stage__overlay"
+                                [class.board-stage__overlay--active]="
+                                    selectedReservation()?.reservationId === reservation.reservationId
+                                "
+                                [style.left.%]="reservationLeft(reservation)"
+                                [style.top.%]="reservationTop(reservation)"
+                                [style.width.%]="reservationWidth(reservation)"
+                                [style.height.%]="reservationHeight(reservation)"
+                                [style.--reservation-accent]="reservation.accentColor"
+                                (mouseenter)="highlightReservation(reservation.reservationId)"
+                                (mouseleave)="highlightReservation(null)"
+                                (click)="selectReservation(reservation.reservationId)"
+                            >
+                                <span>{{ reservation.title }}</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </ui-card>
+
+            <div class="home-page__sidebar">
+                @if (selectedReservation(); as reservation) {
+                    <ui-card
+                        eyebrow="Selected region"
+                        title="{{ reservation.title }}"
+                        subtitle="Owned by {{ reservation.ownerDisplayName }}"
+                    >
+                        <dl class="home-page__details">
+                            <div>
+                                <dt>Position</dt>
+                                <dd>{{ reservation.x }}, {{ reservation.y }}</dd>
+                            </div>
+                            <div>
+                                <dt>Size</dt>
+                                <dd>{{ reservation.width }} x {{ reservation.height }}</dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd>{{ reservation.isReserved ? 'Reserved' : 'Open' }}</dd>
+                            </div>
+                        </dl>
+
+                        <div class="home-page__actions">
+                            <a
+                                [routerLink]="['/reservations', reservation.reservationId, 'edit']"
+                                class="home-page__link-button"
+                            >
+                                Open editor
+                            </a>
+                        </div>
+                    </ui-card>
+                }
+
+                <ui-card
+                    eyebrow="Architecture"
+                    title="Why this split works"
+                    subtitle="The MVP is already aligned with the long-term product direction"
+                    tone="accent"
+                >
+                    <ul class="home-page__notes">
+                        <li>Public board stays cheap to load because it is just a PNG.</li>
+                        <li>Reservation data stays interactive for hover and selection.</li>
+                        <li>The editor can use precise pixel tools without rebuilding the public board UI.</li>
+                    </ul>
+                </ui-card>
+            </div>
+        </section>
+    }
+</main>

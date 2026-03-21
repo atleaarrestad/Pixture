@@ -1,3 +1,5 @@
+using Pixture.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 const string FrontendDevCorsPolicy = "FrontendDev";
 
@@ -15,6 +17,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+builder.Services.AddSingleton<ICanvasBoardService, CanvasBoardService>();
 
 var app = builder.Build();
 
