@@ -35,6 +35,29 @@
             </div>
         </section>
 
+        @if (saveMessage()) {
+            <p class="editor-page__message editor-page__message--hero">{{ saveMessage() }}</p>
+        }
+
+        <section class="editor-page__summary">
+            <div class="editor-summary-chip">
+                <span>Owner</span>
+                <strong>{{ editor.ownerDisplayName }}</strong>
+            </div>
+            <div class="editor-summary-chip">
+                <span>Reservation</span>
+                <strong>{{ editor.width }} x {{ editor.height }}</strong>
+            </div>
+            <div class="editor-summary-chip">
+                <span>Dirty pixels</span>
+                <strong>{{ dirtyPixelCount() }}</strong>
+            </div>
+            <div class="editor-summary-chip">
+                <span>Render version</span>
+                <strong>{{ editor.renderVersion }}</strong>
+            </div>
+        </section>
+
         <section class="editor-page__grid">
             <ui-card
                 class="editor-page__canvas-card"
@@ -95,9 +118,9 @@
 
             <div class="editor-page__sidebar">
                 <ui-card
-                    eyebrow="Status"
-                    title="Editing details"
-                    subtitle="Useful context while you paint"
+                    eyebrow="Paint"
+                    title="Editing controls"
+                    subtitle="Everything you need while drawing stays close together"
                 >
                     <div class="editor-controls">
                         <div class="editor-controls__section">
@@ -169,190 +192,6 @@
                         </div>
 
                         <div class="editor-controls__section">
-                            <span class="editor-controls__label">Image import</span>
-                            <div class="editor-controls__actions">
-                                <button
-                                    type="button"
-                                    class="editor-controls__custom-button"
-                                    [disabled]="isImporting()"
-                                    (click)="openImageUpload()"
-                                >
-                                    <fa-icon [icon]="imageIcon" />
-                                    @if (isImporting()) {
-                                        Importing image...
-                                    } @else {
-                                        Upload image for {{ editor.width }} x {{ editor.height }}
-                                    }
-                                </button>
-                                <input
-                                    #imageUploadInput
-                                    class="editor-controls__custom-input"
-                                    type="file"
-                                    accept="image/*"
-                                    (change)="importImageFromFile($event)"
-                                />
-                            </div>
-                            <p class="editor-controls__hint">
-                                Upload now opens an import setup step so you can preview the result before it touches
-                                your reservation.
-                            </p>
-
-                            @if (hasStagedImport() && importImageSize(); as importImageSize) {
-                                <div class="editor-import">
-                                    <div class="editor-import__summary">
-                                        <strong>{{ importImageName() }}</strong>
-                                        <span>{{ importImageSize.width }} x {{ importImageSize.height }} source</span>
-                                        <span>Target {{ editor.width }} x {{ editor.height }}</span>
-                                    </div>
-
-                                    <p class="editor-controls__hint">
-                                        Drag inside the preview to move the imported image placement around the
-                                        reservation.
-                                    </p>
-
-                                    <div class="editor-import__modes">
-                                        <button
-                                            type="button"
-                                            class="editor-import__mode-button"
-                                            [class.editor-import__mode-button--active]="importMode() === 'cover'"
-                                            (click)="setImportMode('cover')"
-                                        >
-                                            Fill crop
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="editor-import__mode-button"
-                                            [class.editor-import__mode-button--active]="importMode() === 'contain'"
-                                            (click)="setImportMode('contain')"
-                                        >
-                                            Fit whole image
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="editor-import__mode-button"
-                                            [class.editor-import__mode-button--active]="importMode() === 'stretch'"
-                                            (click)="setImportMode('stretch')"
-                                        >
-                                            Stretch
-                                        </button>
-                                    </div>
-
-                                    <p class="editor-controls__hint">{{ importModeSummary() }}</p>
-
-                                    <div class="editor-import__preview-shell">
-                                        <canvas
-                                            #importPreviewCanvas
-                                            class="editor-import__preview"
-                                            (mousedown)="beginImportPlacementDrag($event)"
-                                            (mousemove)="dragImportPlacement($event)"
-                                            (mouseup)="endImportPlacementDrag()"
-                                            (mouseleave)="endImportPlacementDrag()"
-                                        ></canvas>
-                                    </div>
-
-                                    <div class="editor-import__sliders">
-                                        <ui-slider
-                                            label="Import width"
-                                            hint="Shrink the imported image area to leave room for manual drawing."
-                                            [value]="importTargetWidth()"
-                                            [min]="5"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            (valueChange)="setImportTargetWidth($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Import height"
-                                            hint="Control how much of the reservation height the import should use."
-                                            [value]="importTargetHeight()"
-                                            [min]="5"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            (valueChange)="setImportTargetHeight($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Placement horizontal"
-                                            hint="Move the imported area left or right inside the reservation."
-                                            [value]="importPositionX()"
-                                            [min]="0"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            (valueChange)="setImportPositionX($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Placement vertical"
-                                            hint="Move the imported area up or down inside the reservation."
-                                            [value]="importPositionY()"
-                                            [min]="0"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            (valueChange)="setImportPositionY($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Crop horizontal"
-                                            hint="Move the image left or right inside the reservation."
-                                            [value]="importFocusX()"
-                                            [min]="0"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            [disabled]="importMode() === 'stretch'"
-                                            (valueChange)="setImportFocusX($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Crop vertical"
-                                            hint="Move the image up or down inside the reservation."
-                                            [value]="importFocusY()"
-                                            [min]="0"
-                                            [max]="100"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            [disabled]="importMode() === 'stretch'"
-                                            (valueChange)="setImportFocusY($event)"
-                                        />
-
-                                        <ui-slider
-                                            label="Import zoom"
-                                            hint="Zoom in to crop more tightly or zoom out to show more of the image."
-                                            [value]="importZoom()"
-                                            [min]="100"
-                                            [max]="300"
-                                            [step]="1"
-                                            valueSuffix="%"
-                                            [disabled]="importMode() === 'stretch'"
-                                            (valueChange)="setImportZoom($event)"
-                                        />
-                                    </div>
-
-                                    <div class="editor-import__actions">
-                                        <button
-                                            type="button"
-                                            class="editor-controls__custom-button"
-                                            (click)="applyStagedImageImport()"
-                                        >
-                                            Apply import
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="editor-controls__custom-button editor-controls__custom-button--ghost"
-                                            (click)="clearImageImport()"
-                                        >
-                                            Clear setup
-                                        </button>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-
-                        <div class="editor-controls__section">
                             <ui-slider
                                 label="Zoom"
                                 hint="Drag to scale the editor from 1x to 50x."
@@ -365,58 +204,192 @@
                             />
                         </div>
                     </div>
-
-                    <dl class="editor-details">
-                        <div>
-                            <dt>Owner</dt>
-                            <dd>{{ editor.ownerDisplayName }}</dd>
-                        </div>
-                        <div>
-                            <dt>Canvas size</dt>
-                            <dd>{{ editor.canvasWidth }} x {{ editor.canvasHeight }}</dd>
-                        </div>
-                        <div>
-                            <dt>Reservation size</dt>
-                            <dd>{{ editor.width }} x {{ editor.height }}</dd>
-                        </div>
-                        <div>
-                            <dt>Dirty pixels</dt>
-                            <dd>{{ dirtyPixelCount() }}</dd>
-                        </div>
-                        <div>
-                            <dt>Render version</dt>
-                            <dd>{{ editor.renderVersion }}</dd>
-                        </div>
-                        <div class="editor-details__row--stacked">
-                            <dt>Link</dt>
-                            <dd>
-                                @if (hasExternalLink(editor)) {
-                                    <a [href]="editor.linkUrl" class="editor-page__url" target="_blank" rel="noreferrer">
-                                        {{ editor.linkUrl }}
-                                    </a>
-                                } @else {
-                                    <span class="editor-page__muted">No link set</span>
-                                }
-                            </dd>
-                        </div>
-                    </dl>
-
-                    @if (saveMessage()) {
-                        <p class="editor-page__message">{{ saveMessage() }}</p>
-                    }
                 </ui-card>
 
                 <ui-card
-                    eyebrow="Prototype notes"
-                    title="What this MVP proves"
-                    subtitle="Enough structure to build the real marketplace flow next"
-                    tone="accent"
+                    eyebrow="Import"
+                    title="Image import"
+                    subtitle="Set up placement, cropping, and sizing without losing the canvas view"
                 >
-                    <ul class="editor-notes">
-                        <li>Reservation bounds are enforced server-side.</li>
-                        <li>Only changed pixels are sent during save.</li>
-                        <li>The public board image gets a fresh render version after writes.</li>
-                    </ul>
+                    <div class="editor-controls__actions">
+                        <button
+                            type="button"
+                            class="editor-controls__custom-button"
+                            [disabled]="isImporting()"
+                            (click)="openImageUpload()"
+                        >
+                            <fa-icon [icon]="imageIcon" />
+                            @if (isImporting()) {
+                                Importing image...
+                            } @else {
+                                Upload image for {{ editor.width }} x {{ editor.height }}
+                            }
+                        </button>
+                        <input
+                            #imageUploadInput
+                            class="editor-controls__custom-input"
+                            type="file"
+                            accept="image/*"
+                            (change)="importImageFromFile($event)"
+                        />
+                    </div>
+                    <p class="editor-controls__hint">
+                        Upload now opens an import setup step so you can preview the result before it touches
+                        your reservation.
+                    </p>
+
+                    @if (hasStagedImport() && importImageSize(); as importImageSize) {
+                        <div class="editor-import">
+                            <div class="editor-import__summary">
+                                <strong>{{ importImageName() }}</strong>
+                                <span>{{ importImageSize.width }} x {{ importImageSize.height }} source</span>
+                                <span>Target {{ editor.width }} x {{ editor.height }}</span>
+                            </div>
+
+                            <p class="editor-controls__hint">
+                                Drag inside the preview to move the imported image placement around the reservation.
+                            </p>
+
+                            <div class="editor-import__modes">
+                                <button
+                                    type="button"
+                                    class="editor-import__mode-button"
+                                    [class.editor-import__mode-button--active]="importMode() === 'cover'"
+                                    (click)="setImportMode('cover')"
+                                >
+                                    Fill crop
+                                </button>
+                                <button
+                                    type="button"
+                                    class="editor-import__mode-button"
+                                    [class.editor-import__mode-button--active]="importMode() === 'contain'"
+                                    (click)="setImportMode('contain')"
+                                >
+                                    Fit whole image
+                                </button>
+                                <button
+                                    type="button"
+                                    class="editor-import__mode-button"
+                                    [class.editor-import__mode-button--active]="importMode() === 'stretch'"
+                                    (click)="setImportMode('stretch')"
+                                >
+                                    Stretch
+                                </button>
+                            </div>
+
+                            <p class="editor-controls__hint">{{ importModeSummary() }}</p>
+
+                            <div class="editor-import__preview-shell">
+                                <canvas
+                                    #importPreviewCanvas
+                                    class="editor-import__preview"
+                                    (mousedown)="beginImportPlacementDrag($event)"
+                                    (mousemove)="dragImportPlacement($event)"
+                                    (mouseup)="endImportPlacementDrag()"
+                                    (mouseleave)="endImportPlacementDrag()"
+                                ></canvas>
+                            </div>
+
+                            <div class="editor-import__sliders">
+                                <ui-slider
+                                    label="Import width"
+                                    hint="Shrink the imported image area to leave room for manual drawing."
+                                    [value]="importTargetWidth()"
+                                    [min]="5"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    (valueChange)="setImportTargetWidth($event)"
+                                />
+
+                                <ui-slider
+                                    label="Import height"
+                                    hint="Control how much of the reservation height the import should use."
+                                    [value]="importTargetHeight()"
+                                    [min]="5"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    (valueChange)="setImportTargetHeight($event)"
+                                />
+
+                                <ui-slider
+                                    label="Placement horizontal"
+                                    hint="Move the imported area left or right inside the reservation."
+                                    [value]="importPositionX()"
+                                    [min]="0"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    (valueChange)="setImportPositionX($event)"
+                                />
+
+                                <ui-slider
+                                    label="Placement vertical"
+                                    hint="Move the imported area up or down inside the reservation."
+                                    [value]="importPositionY()"
+                                    [min]="0"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    (valueChange)="setImportPositionY($event)"
+                                />
+
+                                <ui-slider
+                                    label="Crop horizontal"
+                                    hint="Move the image left or right inside the reservation."
+                                    [value]="importFocusX()"
+                                    [min]="0"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    [disabled]="importMode() === 'stretch'"
+                                    (valueChange)="setImportFocusX($event)"
+                                />
+
+                                <ui-slider
+                                    label="Crop vertical"
+                                    hint="Move the image up or down inside the reservation."
+                                    [value]="importFocusY()"
+                                    [min]="0"
+                                    [max]="100"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    [disabled]="importMode() === 'stretch'"
+                                    (valueChange)="setImportFocusY($event)"
+                                />
+
+                                <ui-slider
+                                    label="Import zoom"
+                                    hint="Zoom in to crop more tightly or zoom out to show more of the image."
+                                    [value]="importZoom()"
+                                    [min]="100"
+                                    [max]="300"
+                                    [step]="1"
+                                    valueSuffix="%"
+                                    [disabled]="importMode() === 'stretch'"
+                                    (valueChange)="setImportZoom($event)"
+                                />
+                            </div>
+
+                            <div class="editor-import__actions">
+                                <button
+                                    type="button"
+                                    class="editor-controls__custom-button"
+                                    (click)="applyStagedImageImport()"
+                                >
+                                    Apply import
+                                </button>
+                                <button
+                                    type="button"
+                                    class="editor-controls__custom-button editor-controls__custom-button--ghost"
+                                    (click)="clearImageImport()"
+                                >
+                                    Clear setup
+                                </button>
+                            </div>
+                        </div>
+                    }
                 </ui-card>
             </div>
         </section>

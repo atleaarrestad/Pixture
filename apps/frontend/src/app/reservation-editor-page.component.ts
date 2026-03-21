@@ -388,10 +388,6 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.importDragState = null;
     }
 
-    protected hasExternalLink(editor: ReservationEditorData): boolean {
-        return !!editor.linkUrl;
-    }
-
     protected canUndo(): boolean {
         return this.pixelHistory().length > 0;
     }
