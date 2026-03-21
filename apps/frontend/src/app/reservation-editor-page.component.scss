@@ -100,6 +100,20 @@
     font-size: var(--font-size-sm);
 }
 
+.editor-stage-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.editor-stage-toolbar__meta {
+    color: var(--token-text-secondary);
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+
 .editor-stage {
     width: 100%;
     max-width: 100%;

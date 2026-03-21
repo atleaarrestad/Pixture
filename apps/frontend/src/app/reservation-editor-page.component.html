@@ -22,9 +22,6 @@
 
             <div class="editor-page__hero-actions">
                 <a routerLink="/" class="editor-page__link-button">Back to board</a>
-                <ui-button variant="ghost" [disabled]="!canUndo()" (pressed)="undoLastStroke()">
-                    Undo
-                </ui-button>
                 <ui-button
                     variant="secondary"
                     [disabled]="!hasUnsavedChanges() || isSaving()"
@@ -47,6 +44,14 @@
             >
                 <div class="editor-stage-hint">
                     Every pixel shown here is editable. The stage is kept plain so the pixel grid stays easy to read.
+                </div>
+
+                <div class="editor-stage-toolbar">
+                    <ui-button variant="ghost" [disabled]="!canUndo()" (pressed)="undoLastStroke()">
+                        Undo
+                    </ui-button>
+
+                    <span class="editor-stage-toolbar__meta">Zoom {{ zoom() }}x</span>
                 </div>
 
                 <div class="editor-stage">
