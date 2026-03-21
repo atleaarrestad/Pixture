@@ -1,5 +1,5 @@
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faBrush, faFillDrip, faRotateLeft, faSlash } from '@fortawesome/free-solid-svg-icons';
+import { faBrush, faFillDrip, faImage, faRotateLeft, faSlash } from '@fortawesome/free-solid-svg-icons';
 import {
     AfterViewInit,
     Component,
@@ -26,6 +26,8 @@ interface RecentColorEntry {
 
 type DrawTool = 'brush' | 'bucket' | 'line';
 
+const EMPTY_PIXEL_COLOR = '#fffdf8';
+
 @Component({
     selector: 'app-reservation-editor-page',
     imports: [
@@ -50,6 +52,9 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     @ViewChild('customColorPicker')
     private customColorPicker?: ElementRef<HTMLInputElement>;
 
+    @ViewChild('imageUploadInput')
+    private imageUploadInput?: ElementRef<HTMLInputElement>;
+
     private readonly route = inject(ActivatedRoute);
     private readonly canvasApi = inject(CanvasApiService);
 
@@ -63,6 +68,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly recentColors = signal<RecentColorEntry[]>([]);
     protected readonly isLoading = signal(true);
     protected readonly isSaving = signal(false);
+    protected readonly isImporting = signal(false);
     protected readonly loadError = signal<string | null>(null);
     protected readonly saveMessage = signal<string | null>(null);
     protected readonly hasUnsavedChanges = computed(() => {
@@ -119,6 +125,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly bucketIcon = faFillDrip;
     protected readonly lineIcon = faSlash;
     protected readonly undoIcon = faRotateLeft;
+    protected readonly imageIcon = faImage;
 
     public async ngAfterViewInit(): Promise<void> {
         this.hasViewInitialized = true;
@@ -197,10 +204,33 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.customColorPicker?.nativeElement.click();
     }
 
+    protected openImageUpload(): void {
+        const input = this.imageUploadInput?.nativeElement;
+        if (!input || this.isImporting()) {
+            return;
+        }
+
+        input.value = '';
+        input.click();
+    }
+
     protected applyCustomColor(event: Event): void {
         const element = event.target as HTMLInputElement | null;
         if (element?.value) {
             this.selectColor(element.value);
+        }
+    }
+
+    protected async importImageFromFile(event: Event): Promise<void> {
+        const element = event.target as HTMLInputElement | null;
+        const file = element?.files?.item(0);
+        if (!file) {
+            return;
+        }
+
+        await this.applyImageImport(file);
+        if (element) {
+            element.value = '';
         }
     }
 
@@ -296,6 +326,48 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             this.loadError.set('Could not load this reservation editor.');
         } finally {
             this.isLoading.set(false);
+        }
+    }
+
+    private async applyImageImport(file: File): Promise<void> {
+        const editor = this.editor();
+        if (!editor) {
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            this.saveMessage.set('Please choose an image file to import.');
+            return;
+        }
+
+        this.isImporting.set(true);
+        this.saveMessage.set(null);
+        this.isPainting = false;
+        this.hasPendingStrokeSnapshot = false;
+        this.lineStart.set(null);
+        this.linePreviewEnd.set(null);
+
+        try {
+            const currentPixels = this.pixels();
+            const importedPixels = await this.resizeImageToPixels(file, editor.width, editor.height);
+            const changedCount = importedPixels.reduce((count, color, index) => {
+                return color === currentPixels[index] ? count : count + 1;
+            }, 0);
+
+            if (changedCount === 0) {
+                this.renderCanvas();
+                this.saveMessage.set('Imported image already matches the current pixels.');
+                return;
+            }
+
+            this.pushUndoSnapshot();
+            this.pixels.set(importedPixels);
+            this.renderCanvas();
+            this.saveMessage.set(`Imported image into ${changedCount} pixels. Review it, then save changes.`);
+        } catch (error: unknown) {
+            this.saveMessage.set(this.getImageImportErrorMessage(error));
+        } finally {
+            this.isImporting.set(false);
         }
     }
 
@@ -474,6 +546,55 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.renderLinePreview(context, editor.width, editor.height, zoom);
     }
 
+    private async resizeImageToPixels(
+        file: File,
+        width: number,
+        height: number,
+    ): Promise<string[]> {
+        const image = await this.loadImageFile(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) {
+            throw new Error('Could not prepare the image importer.');
+        }
+
+        context.clearRect(0, 0, width, height);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.drawImage(image, 0, 0, width, height);
+
+        const imageData = context.getImageData(0, 0, width, height).data;
+        const nextPixels = Array.from({ length: width * height }, () => EMPTY_PIXEL_COLOR);
+
+        for (let index = 0; index < width * height; index++) {
+            const offset = index * 4;
+            const alpha = imageData[offset + 3] / 255;
+            if (alpha <= 0) {
+                continue;
+            }
+
+            const sourceRed = imageData[offset];
+            const sourceGreen = imageData[offset + 1];
+            const sourceBlue = imageData[offset + 2];
+
+            if (alpha >= 1) {
+                nextPixels[index] = this.rgbToHex(sourceRed, sourceGreen, sourceBlue);
+                continue;
+            }
+
+            const baseColor = this.hexToRgb(EMPTY_PIXEL_COLOR);
+            const red = Math.round((sourceRed * alpha) + (baseColor.red * (1 - alpha)));
+            const green = Math.round((sourceGreen * alpha) + (baseColor.green * (1 - alpha)));
+            const blue = Math.round((sourceBlue * alpha) + (baseColor.blue * (1 - alpha)));
+            nextPixels[index] = this.rgbToHex(red, green, blue);
+        }
+
+        return nextPixels;
+    }
+
     private normalizeLinkUrl(value: string): string | null {
         const trimmedValue = value.trim();
         return trimmedValue.length > 0 ? trimmedValue : null;
@@ -525,6 +646,52 @@ export class ReservationEditorPageComponent implements AfterViewInit {
                 currentY += stepY;
             }
         }
+    }
+
+    private async loadImageFile(file: File): Promise<HTMLImageElement> {
+        return await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            const objectUrl = URL.createObjectURL(file);
+
+            image.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                resolve(image);
+            };
+
+            image.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                reject(new Error('Could not read that image file.'));
+            };
+
+            image.src = objectUrl;
+        });
+    }
+
+    private hexToRgb(color: string): { red: number; green: number; blue: number } {
+        const normalizedColor = this.normalizeColor(color);
+        if (!/^#[0-9a-f]{6}$/.test(normalizedColor)) {
+            throw new Error(`Unsupported color format: ${color}`);
+        }
+
+        return {
+            red: Number.parseInt(normalizedColor.slice(1, 3), 16),
+            green: Number.parseInt(normalizedColor.slice(3, 5), 16),
+            blue: Number.parseInt(normalizedColor.slice(5, 7), 16),
+        };
+    }
+
+    private rgbToHex(red: number, green: number, blue: number): string {
+        return `#${[red, green, blue]
+            .map(value => value.toString(16).padStart(2, '0'))
+            .join('')}`;
+    }
+
+    private getImageImportErrorMessage(error: unknown): string {
+        if (error instanceof Error) {
+            return error.message;
+        }
+
+        return 'Could not import that image right now.';
     }
 
     private renderLinePreview(

@@ -169,6 +169,36 @@
                         </div>
 
                         <div class="editor-controls__section">
+                            <span class="editor-controls__label">Image import</span>
+                            <div class="editor-controls__actions">
+                                <button
+                                    type="button"
+                                    class="editor-controls__custom-button"
+                                    [disabled]="isImporting()"
+                                    (click)="openImageUpload()"
+                                >
+                                    <fa-icon [icon]="imageIcon" />
+                                    @if (isImporting()) {
+                                        Importing image...
+                                    } @else {
+                                        Upload image for {{ editor.width }} x {{ editor.height }}
+                                    }
+                                </button>
+                                <input
+                                    #imageUploadInput
+                                    class="editor-controls__custom-input"
+                                    type="file"
+                                    accept="image/*"
+                                    (change)="importImageFromFile($event)"
+                                />
+                            </div>
+                            <p class="editor-controls__hint">
+                                The image is resized to your reservation and replaces the current pixels. Transparent
+                                areas are cleared to the reservation background color.
+                            </p>
+                        </div>
+
+                        <div class="editor-controls__section">
                             <ui-slider
                                 label="Zoom"
                                 hint="Drag to scale the editor from 1x to 50x."
