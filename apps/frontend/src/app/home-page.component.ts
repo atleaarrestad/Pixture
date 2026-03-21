@@ -62,6 +62,14 @@ export class HomePageComponent {
         this.selectedReservationId.set(reservationId);
     }
 
+    protected editorRoute(reservation: CanvasReservation): string {
+        return `/reservations/${reservation.reservationId}/edit`;
+    }
+
+    protected hasExternalLink(reservation: CanvasReservation): boolean {
+        return !!reservation.linkUrl;
+    }
+
     private async loadBoard(): Promise<void> {
         try {
             const [canvas, reservations] = await Promise.all([

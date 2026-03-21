@@ -11,6 +11,7 @@ export interface CanvasReservation {
     reservationId: string;
     title: string;
     ownerDisplayName: string;
+    linkUrl?: string | null;
     x: number;
     y: number;
     width: number;
@@ -23,6 +24,7 @@ export interface ReservationEditorData {
     reservationId: string;
     title: string;
     ownerDisplayName: string;
+    linkUrl?: string | null;
     canvasWidth: number;
     canvasHeight: number;
     x: number;
@@ -41,6 +43,7 @@ export interface PixelChange {
 
 export interface UpdateReservationPixelsRequest {
     changes: PixelChange[];
+    linkUrl?: string | null;
 }
 
 export interface UpdateReservationPixelsResponse {
@@ -48,4 +51,5 @@ export interface UpdateReservationPixelsResponse {
     renderVersion: string;
     updatedAt: string;
     appliedChanges: number;
+    linkUrl?: string | null;
 }

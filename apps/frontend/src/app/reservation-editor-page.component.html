@@ -24,7 +24,7 @@
                 <a routerLink="/" class="editor-page__link-button">Back to board</a>
                 <ui-button
                     variant="secondary"
-                    [disabled]="dirtyPixelCount() === 0 || isSaving()"
+                    [disabled]="!hasUnsavedChanges() || isSaving()"
                     (pressed)="save()"
                 >
                     @if (isSaving()) {
@@ -42,31 +42,8 @@
                 title="Pixel workspace"
                 subtitle="Reservation {{ editor.width }} x {{ editor.height }} at {{ editor.x }}, {{ editor.y }}"
             >
-                <div class="editor-toolbar">
-                    <label class="editor-toolbar__field">
-                        <span>Brush color</span>
-                        <input
-                            type="color"
-                            [ngModel]="selectedColor()"
-                            (ngModelChange)="selectedColor.set($event)"
-                        />
-                    </label>
-
-                    <div class="editor-toolbar__zoom">
-                        <span>Zoom</span>
-                        <div class="editor-toolbar__zoom-actions">
-                            @for (zoomOption of [12, 18, 24]; track zoomOption) {
-                                <button
-                                    type="button"
-                                    class="editor-toolbar__zoom-button"
-                                    [class.editor-toolbar__zoom-button--active]="zoom() === zoomOption"
-                                    (click)="setZoom(zoomOption)"
-                                >
-                                    {{ zoomOption }}x
-                                </button>
-                            }
-                        </div>
-                    </div>
+                <div class="editor-stage-hint">
+                    Every pixel shown here is editable. The stage is kept plain so the pixel grid stays easy to read.
                 </div>
 
                 <div class="editor-stage">
@@ -87,6 +64,60 @@
                     title="Editing details"
                     subtitle="Useful context while you paint"
                 >
+                    <div class="editor-controls">
+                        <div class="editor-controls__section">
+                            <label class="editor-controls__text-field">
+                                <span class="editor-controls__label">Destination link</span>
+                                <input
+                                    type="url"
+                                    [ngModel]="linkUrl()"
+                                    (ngModelChange)="linkUrl.set($event)"
+                                    placeholder="https://example.com"
+                                />
+                            </label>
+                        </div>
+
+                        <div class="editor-controls__section">
+                            <span class="editor-controls__label">Brush color</span>
+                            <div class="editor-controls__palette">
+                                @for (color of palette; track color) {
+                                    <button
+                                        type="button"
+                                        class="editor-controls__swatch"
+                                        [class.editor-controls__swatch--active]="selectedColor() === color"
+                                        [style.background]="color"
+                                        [attr.aria-label]="'Select ' + color"
+                                        (click)="selectColor(color)"
+                                    ></button>
+                                }
+                            </div>
+                            <label class="editor-controls__custom">
+                                <span>Custom</span>
+                                <input
+                                    type="color"
+                                    [ngModel]="selectedColor()"
+                                    (ngModelChange)="selectedColor.set($event)"
+                                />
+                            </label>
+                        </div>
+
+                        <div class="editor-controls__section">
+                            <span class="editor-controls__label">Zoom</span>
+                            <div class="editor-toolbar__zoom-actions">
+                                @for (zoomOption of [12, 18, 24]; track zoomOption) {
+                                    <button
+                                        type="button"
+                                        class="editor-toolbar__zoom-button"
+                                        [class.editor-toolbar__zoom-button--active]="zoom() === zoomOption"
+                                        (click)="setZoom(zoomOption)"
+                                    >
+                                        {{ zoomOption }}x
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
                     <dl class="editor-details">
                         <div>
                             <dt>Owner</dt>
@@ -107,6 +138,18 @@
                         <div>
                             <dt>Render version</dt>
                             <dd>{{ editor.renderVersion }}</dd>
+                        </div>
+                        <div class="editor-details__row--stacked">
+                            <dt>Link</dt>
+                            <dd>
+                                @if (hasExternalLink(editor)) {
+                                    <a [href]="editor.linkUrl" class="editor-page__url" target="_blank" rel="noreferrer">
+                                        {{ editor.linkUrl }}
+                                    </a>
+                                } @else {
+                                    <span class="editor-page__muted">No link set</span>
+                                }
+                            </dd>
                         </div>
                     </dl>
 

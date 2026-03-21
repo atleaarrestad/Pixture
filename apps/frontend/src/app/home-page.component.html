@@ -102,13 +102,32 @@
                                 <dt>Status</dt>
                                 <dd>{{ reservation.isReserved ? 'Reserved' : 'Open' }}</dd>
                             </div>
+                            <div class="home-page__details-row--stacked">
+                                <dt>Link</dt>
+                                <dd>
+                                    @if (hasExternalLink(reservation)) {
+                                        <a [href]="reservation.linkUrl" class="home-page__url" target="_blank" rel="noreferrer">
+                                            {{ reservation.linkUrl }}
+                                        </a>
+                                    } @else {
+                                        <span class="home-page__muted">No link set</span>
+                                    }
+                                </dd>
+                            </div>
                         </dl>
 
                         <div class="home-page__actions">
-                            <a
-                                [routerLink]="['/reservations', reservation.reservationId, 'edit']"
-                                class="home-page__link-button"
-                            >
+                            @if (hasExternalLink(reservation)) {
+                                <a
+                                    [href]="reservation.linkUrl"
+                                    class="home-page__link-button home-page__link-button--secondary"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Visit link
+                                </a>
+                            }
+                            <a [routerLink]="editorRoute(reservation)" class="home-page__link-button">
                                 Open editor
                             </a>
                         </div>

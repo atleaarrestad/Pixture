@@ -12,6 +12,7 @@ public sealed record CanvasReservationResponse(
     Guid ReservationId,
     string Title,
     string OwnerDisplayName,
+    string? LinkUrl,
     int X,
     int Y,
     int Width,
@@ -23,6 +24,7 @@ public sealed record ReservationEditorResponse(
     Guid ReservationId,
     string Title,
     string OwnerDisplayName,
+    string? LinkUrl,
     int CanvasWidth,
     int CanvasHeight,
     int X,
@@ -38,10 +40,12 @@ public sealed record PixelChangeRequest(
     string ColorHex);
 
 public sealed record UpdateReservationPixelsRequest(
-    IReadOnlyList<PixelChangeRequest> Changes);
+    IReadOnlyList<PixelChangeRequest> Changes,
+    string? LinkUrl);
 
 public sealed record UpdateReservationPixelsResponse(
     Guid ReservationId,
     string RenderVersion,
     DateTimeOffset UpdatedAt,
-    int AppliedChanges);
+    int AppliedChanges,
+    string? LinkUrl);

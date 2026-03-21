@@ -36,6 +36,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A001"),
                 "North launch banner",
                 "Atle",
+                "https://github.com/",
                 4,
                 4,
                 18,
@@ -45,6 +46,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A002"),
                 "Skyline teaser",
                 "Mia",
+                "https://angular.dev/",
                 28,
                 7,
                 14,
@@ -54,6 +56,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A003"),
                 "Footer callout",
                 "Noah",
+                "https://dotnet.microsoft.com/",
                 16,
                 24,
                 24,
@@ -88,6 +91,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                     reservation.Id,
                     reservation.Title,
                     reservation.OwnerDisplayName,
+                    reservation.LinkUrl,
                     reservation.X,
                     reservation.Y,
                     reservation.Width,
@@ -144,6 +148,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 reservation.Id,
                 reservation.Title,
                 reservation.OwnerDisplayName,
+                reservation.LinkUrl,
                 CanvasWidth,
                 CanvasHeight,
                 reservation.X,
@@ -166,6 +171,9 @@ public sealed class CanvasBoardService : ICanvasBoardService
             {
                 return null;
             }
+
+            var normalizedLinkUrl = NormalizeLinkUrl(request.LinkUrl);
+            reservation.LinkUrl = normalizedLinkUrl;
 
             var pixels = reservationPixels[reservationId];
             var appliedChanges = 0;
@@ -194,7 +202,8 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 reservationId,
                 $"v{renderVersion}",
                 updatedAt,
-                appliedChanges);
+                appliedChanges,
+                normalizedLinkUrl);
         }
     }
 
@@ -258,15 +267,49 @@ public sealed class CanvasBoardService : ICanvasBoardService
             Convert.ToByte(colorHex[5..7], 16));
     }
 
-    private sealed record ReservationRecord(
-        Guid Id,
-        string Title,
-        string OwnerDisplayName,
-        int X,
-        int Y,
-        int Width,
-        int Height,
-        string AccentColor);
+    private static string? NormalizeLinkUrl(string? linkUrl)
+    {
+        if (string.IsNullOrWhiteSpace(linkUrl))
+        {
+            return null;
+        }
+
+        var candidateUrl = linkUrl.Trim();
+        if (!candidateUrl.Contains("://", StringComparison.Ordinal))
+        {
+            candidateUrl = $"https://{candidateUrl}";
+        }
+
+        if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var parsedUri)
+            || (parsedUri.Scheme != Uri.UriSchemeHttp && parsedUri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new ArgumentException("Link URL must be a valid absolute http or https address.", nameof(linkUrl));
+        }
+
+        return parsedUri.ToString();
+    }
+
+    private sealed class ReservationRecord(
+        Guid id,
+        string title,
+        string ownerDisplayName,
+        string? linkUrl,
+        int x,
+        int y,
+        int width,
+        int height,
+        string accentColor)
+    {
+        public Guid Id { get; } = id;
+        public string Title { get; } = title;
+        public string OwnerDisplayName { get; } = ownerDisplayName;
+        public string? LinkUrl { get; set; } = linkUrl;
+        public int X { get; } = x;
+        public int Y { get; } = y;
+        public int Width { get; } = width;
+        public int Height { get; } = height;
+        public string AccentColor { get; } = accentColor;
+    }
 }
 
 public sealed record CanvasSummarySnapshot(

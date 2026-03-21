@@ -24,7 +24,10 @@ import { UiSpinnerComponent } from './ui/ui-spinner.component';
 })
 export class ReservationEditorPageComponent implements AfterViewInit {
     @ViewChild('editorCanvas')
-    private editorCanvas?: ElementRef<HTMLCanvasElement>;
+    private set editorCanvasRef(value: ElementRef<HTMLCanvasElement> | undefined) {
+        this.editorCanvas = value;
+        this.renderCanvas();
+    }
 
     private readonly route = inject(ActivatedRoute);
     private readonly canvasApi = inject(CanvasApiService);
@@ -32,11 +35,24 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly editor = signal<ReservationEditorData | null>(null);
     protected readonly pixels = signal<string[]>([]);
     protected readonly selectedColor = signal('#ff7eb6');
+    protected readonly linkUrl = signal('');
     protected readonly zoom = signal(18);
+    protected readonly palette = ['#1f1633', '#fffdf8', '#ff7eb6', '#b9b2ff', '#8ed8f8', '#b9f2cf', '#ffd37a'];
     protected readonly isLoading = signal(true);
     protected readonly isSaving = signal(false);
     protected readonly loadError = signal<string | null>(null);
     protected readonly saveMessage = signal<string | null>(null);
+    protected readonly hasUnsavedChanges = computed(() => {
+        const editor = this.editor();
+        if (!editor) {
+            return false;
+        }
+
+        const normalizedCurrentLink = this.normalizeLinkUrl(this.linkUrl());
+        const normalizedSavedLink = this.normalizeLinkUrl(editor.linkUrl ?? '');
+
+        return this.dirtyPixelCount() > 0 || normalizedCurrentLink !== normalizedSavedLink;
+    });
     protected readonly dirtyPixelCount = computed(() => {
         const editor = this.editor();
         if (!editor) {
@@ -50,6 +66,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
 
     private isPainting = false;
     private hasViewInitialized = false;
+    private editorCanvas?: ElementRef<HTMLCanvasElement>;
 
     public async ngAfterViewInit(): Promise<void> {
         this.hasViewInitialized = true;
@@ -58,7 +75,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
 
     protected async save(): Promise<void> {
         const editor = this.editor();
-        if (!editor || this.dirtyPixelCount() === 0 || this.isSaving()) {
+        if (!editor || !this.hasUnsavedChanges() || this.isSaving()) {
             return;
         }
 
@@ -76,14 +93,19 @@ export class ReservationEditorPageComponent implements AfterViewInit {
 
         try {
             const response = await firstValueFrom(
-                this.canvasApi.updateReservationPixels(editor.reservationId, { changes }),
+                this.canvasApi.updateReservationPixels(editor.reservationId, {
+                    changes,
+                    linkUrl: this.normalizeLinkUrl(this.linkUrl()),
+                }),
             );
 
             this.editor.set({
                 ...editor,
+                linkUrl: response.linkUrl ?? null,
                 renderVersion: response.renderVersion,
                 pixels: [...this.pixels()],
             });
+            this.linkUrl.set(response.linkUrl ?? '');
             this.saveMessage.set(`Saved ${response.appliedChanges} pixel updates.`);
         } catch {
             this.saveMessage.set('Could not save this reservation right now.');
@@ -95,6 +117,14 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected setZoom(zoom: number): void {
         this.zoom.set(zoom);
         this.renderCanvas();
+    }
+
+    protected selectColor(color: string): void {
+        this.selectedColor.set(color);
+    }
+
+    protected hasExternalLink(editor: ReservationEditorData): boolean {
+        return !!editor.linkUrl;
     }
 
     protected beginPaint(event: MouseEvent): void {
@@ -124,6 +154,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             const editor = await firstValueFrom(this.canvasApi.getReservationEditor(reservationId));
             this.editor.set(editor);
             this.pixels.set([...editor.pixels]);
+            this.linkUrl.set(editor.linkUrl ?? '');
             this.renderCanvas();
         } catch {
             this.loadError.set('Could not load this reservation editor.');
@@ -180,11 +211,16 @@ export class ReservationEditorPageComponent implements AfterViewInit {
                 context.fillRect(x * zoom, y * zoom, zoom, zoom);
 
                 if (zoom >= 12) {
-                    context.strokeStyle = '#1f1633';
-                    context.lineWidth = 2;
-                    context.strokeRect(x * zoom, y * zoom, zoom, zoom);
+                    context.strokeStyle = 'rgba(31, 22, 51, 0.18)';
+                    context.lineWidth = 1;
+                    context.strokeRect((x * zoom) + 0.5, (y * zoom) + 0.5, zoom - 1, zoom - 1);
                 }
             }
         }
+    }
+
+    private normalizeLinkUrl(value: string): string | null {
+        const trimmedValue = value.trim();
+        return trimmedValue.length > 0 ? trimmedValue : null;
     }
 }
