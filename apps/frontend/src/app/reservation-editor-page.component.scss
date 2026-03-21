@@ -371,11 +371,22 @@
     image-rendering: pixelated;
     border: var(--border-medium) solid var(--token-border-strong);
     background: #fffdf8;
+    cursor: grab;
+}
+
+.editor-import__preview:active {
+    cursor: grabbing;
 }
 
 .editor-import__sliders {
     display: grid;
     gap: var(--space-3);
+}
+
+.editor-import__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
 }
 
 .editor-page__url {

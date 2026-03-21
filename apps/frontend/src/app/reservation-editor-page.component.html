@@ -191,22 +191,6 @@
                                     accept="image/*"
                                     (change)="importImageFromFile($event)"
                                 />
-                                @if (hasStagedImport()) {
-                                    <button
-                                        type="button"
-                                        class="editor-controls__custom-button"
-                                        (click)="applyStagedImageImport()"
-                                    >
-                                        Apply import
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="editor-controls__custom-button editor-controls__custom-button--ghost"
-                                        (click)="clearImageImport()"
-                                    >
-                                        Clear setup
-                                    </button>
-                                }
                             </div>
                             <p class="editor-controls__hint">
                                 Upload now opens an import setup step so you can preview the result before it touches
@@ -220,6 +204,11 @@
                                         <span>{{ importImageSize.width }} x {{ importImageSize.height }} source</span>
                                         <span>Target {{ editor.width }} x {{ editor.height }}</span>
                                     </div>
+
+                                    <p class="editor-controls__hint">
+                                        Drag inside the preview to move the imported image placement around the
+                                        reservation.
+                                    </p>
 
                                     <div class="editor-import__modes">
                                         <button
@@ -251,10 +240,61 @@
                                     <p class="editor-controls__hint">{{ importModeSummary() }}</p>
 
                                     <div class="editor-import__preview-shell">
-                                        <canvas #importPreviewCanvas class="editor-import__preview"></canvas>
+                                        <canvas
+                                            #importPreviewCanvas
+                                            class="editor-import__preview"
+                                            (mousedown)="beginImportPlacementDrag($event)"
+                                            (mousemove)="dragImportPlacement($event)"
+                                            (mouseup)="endImportPlacementDrag()"
+                                            (mouseleave)="endImportPlacementDrag()"
+                                        ></canvas>
                                     </div>
 
                                     <div class="editor-import__sliders">
+                                        <ui-slider
+                                            label="Import width"
+                                            hint="Shrink the imported image area to leave room for manual drawing."
+                                            [value]="importTargetWidth()"
+                                            [min]="5"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            (valueChange)="setImportTargetWidth($event)"
+                                        />
+
+                                        <ui-slider
+                                            label="Import height"
+                                            hint="Control how much of the reservation height the import should use."
+                                            [value]="importTargetHeight()"
+                                            [min]="5"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            (valueChange)="setImportTargetHeight($event)"
+                                        />
+
+                                        <ui-slider
+                                            label="Placement horizontal"
+                                            hint="Move the imported area left or right inside the reservation."
+                                            [value]="importPositionX()"
+                                            [min]="0"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            (valueChange)="setImportPositionX($event)"
+                                        />
+
+                                        <ui-slider
+                                            label="Placement vertical"
+                                            hint="Move the imported area up or down inside the reservation."
+                                            [value]="importPositionY()"
+                                            [min]="0"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            (valueChange)="setImportPositionY($event)"
+                                        />
+
                                         <ui-slider
                                             label="Crop horizontal"
                                             hint="Move the image left or right inside the reservation."
@@ -290,6 +330,23 @@
                                             [disabled]="importMode() === 'stretch'"
                                             (valueChange)="setImportZoom($event)"
                                         />
+                                    </div>
+
+                                    <div class="editor-import__actions">
+                                        <button
+                                            type="button"
+                                            class="editor-controls__custom-button"
+                                            (click)="applyStagedImageImport()"
+                                        >
+                                            Apply import
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="editor-controls__custom-button editor-controls__custom-button--ghost"
+                                            (click)="clearImageImport()"
+                                        >
+                                            Clear setup
+                                        </button>
                                     </div>
                                 </div>
                             }
