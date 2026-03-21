@@ -105,6 +105,13 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.editor-stage-toolbar__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
 }
 
 .editor-stage-toolbar__meta {

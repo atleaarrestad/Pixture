@@ -22,6 +22,8 @@ interface RecentColorEntry {
     color: string;
 }
 
+type DrawTool = 'brush' | 'bucket' | 'line';
+
 @Component({
     selector: 'app-reservation-editor-page',
     imports: [FormsModule, RouterLink, UiButtonComponent, UiCardComponent, UiSliderComponent, UiSpinnerComponent],
@@ -46,6 +48,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly selectedColor = signal('#ff7eb6');
     protected readonly linkUrl = signal('');
     protected readonly zoom = signal(30);
+    protected readonly selectedTool = signal<DrawTool>('brush');
     protected readonly palette = ['#1f1633', '#fffdf8', '#ff7eb6', '#b9b2ff', '#8ed8f8', '#b9f2cf', '#ffd37a'];
     protected readonly recentColors = signal<RecentColorEntry[]>([]);
     protected readonly isLoading = signal(true);
@@ -73,12 +76,28 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             return color === editor.pixels[index] ? count : count + 1;
         }, 0);
     });
+    protected readonly toolStatus = computed(() => {
+        const lineStart = this.lineStart();
+        if (this.selectedTool() === 'line' && lineStart) {
+            return `Line start ${lineStart.x}, ${lineStart.y}`;
+        }
+
+        switch (this.selectedTool()) {
+            case 'bucket':
+                return 'Bucket fill';
+            case 'line':
+                return 'Line tool';
+            default:
+                return 'Brush tool';
+        }
+    });
 
     private isPainting = false;
     private hasPendingStrokeSnapshot = false;
     private hasViewInitialized = false;
     private editorCanvas?: ElementRef<HTMLCanvasElement>;
     private readonly pixelHistory = signal<string[][]>([]);
+    private readonly lineStart = signal<{ x: number; y: number } | null>(null);
     private nextRecentColorId = 1;
 
     public async ngAfterViewInit(): Promise<void> {
@@ -132,6 +151,13 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.renderCanvas();
     }
 
+    protected selectTool(tool: DrawTool): void {
+        this.selectedTool.set(tool);
+        if (tool !== 'line') {
+            this.lineStart.set(null);
+        }
+    }
+
     protected selectColor(color: string, remember = true): void {
         const normalizedColor = this.normalizeColor(color);
         this.selectedColor.set(normalizedColor);
@@ -177,14 +203,32 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     }
 
     protected beginPaint(event: MouseEvent): void {
-        this.isPainting = true;
-        this.hasPendingStrokeSnapshot = false;
-        this.paintFromEvent(event);
+        const point = this.resolveCanvasPoint(event);
+        if (!point) {
+            return;
+        }
+
+        switch (this.selectedTool()) {
+            case 'bucket':
+                this.applyBucketFill(point.x, point.y);
+                break;
+            case 'line':
+                this.applyLineTool(point.x, point.y);
+                break;
+            default:
+                this.isPainting = true;
+                this.hasPendingStrokeSnapshot = false;
+                this.applyBrush(point.x, point.y);
+                break;
+        }
     }
 
     protected paintWhileDragging(event: MouseEvent): void {
-        if (this.isPainting && event.buttons === 1) {
-            this.paintFromEvent(event);
+        if (this.selectedTool() === 'brush' && this.isPainting && event.buttons === 1) {
+            const point = this.resolveCanvasPoint(event);
+            if (point) {
+                this.applyBrush(point.x, point.y);
+            }
         }
     }
 
@@ -217,11 +261,11 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         }
     }
 
-    private paintFromEvent(event: MouseEvent): void {
+    private resolveCanvasPoint(event: MouseEvent): { x: number; y: number } | null {
         const editor = this.editor();
         const canvas = this.editorCanvas?.nativeElement;
         if (!editor || !canvas) {
-            return;
+            return null;
         }
 
         const rect = canvas.getBoundingClientRect();
@@ -230,6 +274,20 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         const y = Math.floor((event.clientY - rect.top) / zoom);
 
         if (x < 0 || x >= editor.width || y < 0 || y >= editor.height) {
+            return null;
+        }
+
+        return { x, y };
+    }
+
+    private applyBrush(x: number, y: number): void {
+        const editor = this.editor();
+        if (!editor) {
+            return;
+        }
+
+        const pixelIndex = (y * editor.width) + x;
+        if (this.pixels()[pixelIndex] === this.selectedColor()) {
             return;
         }
 
@@ -238,15 +296,103 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             this.hasPendingStrokeSnapshot = true;
         }
 
-        const pixelIndex = (y * editor.width) + x;
-        if (this.pixels()[pixelIndex] === this.selectedColor()) {
-            return;
-        }
-
         const nextPixels = [...this.pixels()];
         nextPixels[pixelIndex] = this.selectedColor();
         this.pixels.set(nextPixels);
         this.renderCanvas();
+    }
+
+    private applyBucketFill(startX: number, startY: number): void {
+        const editor = this.editor();
+        if (!editor) {
+            return;
+        }
+
+        const sourcePixels = this.pixels();
+        const startIndex = (startY * editor.width) + startX;
+        const targetColor = sourcePixels[startIndex];
+        const replacementColor = this.selectedColor();
+
+        if (targetColor === replacementColor) {
+            return;
+        }
+
+        const nextPixels = [...sourcePixels];
+        const queue: Array<{ x: number; y: number }> = [{ x: startX, y: startY }];
+        let changed = false;
+
+        while (queue.length > 0) {
+            const point = queue.pop();
+            if (!point) {
+                continue;
+            }
+
+            const index = (point.y * editor.width) + point.x;
+            if (nextPixels[index] !== targetColor) {
+                continue;
+            }
+
+            nextPixels[index] = replacementColor;
+            changed = true;
+
+            if (point.x > 0) {
+                queue.push({ x: point.x - 1, y: point.y });
+            }
+            if (point.x < editor.width - 1) {
+                queue.push({ x: point.x + 1, y: point.y });
+            }
+            if (point.y > 0) {
+                queue.push({ x: point.x, y: point.y - 1 });
+            }
+            if (point.y < editor.height - 1) {
+                queue.push({ x: point.x, y: point.y + 1 });
+            }
+        }
+
+        if (!changed) {
+            return;
+        }
+
+        this.pushUndoSnapshot();
+        this.pixels.set(nextPixels);
+        this.renderCanvas();
+        this.saveMessage.set(null);
+    }
+
+    private applyLineTool(x: number, y: number): void {
+        const editor = this.editor();
+        if (!editor) {
+            return;
+        }
+
+        const start = this.lineStart();
+        if (!start) {
+            this.lineStart.set({ x, y });
+            return;
+        }
+
+        const linePoints = this.getLinePoints(start.x, start.y, x, y);
+        const nextPixels = [...this.pixels()];
+        let changed = false;
+
+        for (const point of linePoints) {
+            const index = (point.y * editor.width) + point.x;
+            if (nextPixels[index] !== this.selectedColor()) {
+                nextPixels[index] = this.selectedColor();
+                changed = true;
+            }
+        }
+
+        this.lineStart.set(null);
+
+        if (!changed) {
+            return;
+        }
+
+        this.pushUndoSnapshot();
+        this.pixels.set(nextPixels);
+        this.renderCanvas();
+        this.saveMessage.set(null);
     }
 
     private renderCanvas(): void {
@@ -306,5 +452,33 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             ];
             return nextColors.slice(0, 5);
         });
+    }
+
+    private getLinePoints(startX: number, startY: number, endX: number, endY: number): Array<{ x: number; y: number }> {
+        const points: Array<{ x: number; y: number }> = [];
+        let currentX = startX;
+        let currentY = startY;
+        const deltaX = Math.abs(endX - startX);
+        const deltaY = Math.abs(endY - startY);
+        const stepX = startX < endX ? 1 : -1;
+        const stepY = startY < endY ? 1 : -1;
+        let error = deltaX - deltaY;
+
+        while (true) {
+            points.push({ x: currentX, y: currentY });
+            if (currentX === endX && currentY === endY) {
+                return points;
+            }
+
+            const doubledError = 2 * error;
+            if (doubledError > -deltaY) {
+                error -= deltaY;
+                currentX += stepX;
+            }
+            if (doubledError < deltaX) {
+                error += deltaX;
+                currentY += stepY;
+            }
+        }
     }
 }

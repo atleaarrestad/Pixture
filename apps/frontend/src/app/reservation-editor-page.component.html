@@ -47,11 +47,34 @@
                 </div>
 
                 <div class="editor-stage-toolbar">
-                    <ui-button variant="ghost" [disabled]="!canUndo()" (pressed)="undoLastStroke()">
-                        Undo
-                    </ui-button>
+                    <div class="editor-stage-toolbar__tools">
+                        <ui-button
+                            size="sm"
+                            [variant]="selectedTool() === 'brush' ? 'secondary' : 'ghost'"
+                            (pressed)="selectTool('brush')"
+                        >
+                            Brush
+                        </ui-button>
+                        <ui-button
+                            size="sm"
+                            [variant]="selectedTool() === 'bucket' ? 'secondary' : 'ghost'"
+                            (pressed)="selectTool('bucket')"
+                        >
+                            Bucket fill
+                        </ui-button>
+                        <ui-button
+                            size="sm"
+                            [variant]="selectedTool() === 'line' ? 'secondary' : 'ghost'"
+                            (pressed)="selectTool('line')"
+                        >
+                            Line
+                        </ui-button>
+                        <ui-button size="sm" variant="ghost" [disabled]="!canUndo()" (pressed)="undoLastStroke()">
+                            Undo
+                        </ui-button>
+                    </div>
 
-                    <span class="editor-stage-toolbar__meta">Zoom {{ zoom() }}x</span>
+                    <span class="editor-stage-toolbar__meta">{{ toolStatus() }} • Zoom {{ zoom() }}x</span>
                 </div>
 
                 <div class="editor-stage">
