@@ -1,16 +1,8 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
-export type UiSpinnerVariant =
-    | 'tiles'
-    | 'orbit'
-    | 'conveyor'
-    | 'spring'
-    | 'stamps'
-    | 'checker'
-    | 'ladder'
-    | 'burst'
-    | 'satellite'
-    | 'pulse';
+export type UiSpinnerVariant = 'tiles' | 'spring' | 'checker' | 'ladder' | 'pulse';
+
+const defaultSpinnerVariants: UiSpinnerVariant[] = ['spring', 'pulse', 'ladder', 'tiles', 'checker'];
 
 @Component({
     selector: 'ui-spinner',
@@ -18,7 +10,7 @@ export type UiSpinnerVariant =
         <span class="spinner-wrap">
             <span
                 class="spinner"
-                [class]="'spinner spinner--' + variant()"
+                [class]="'spinner spinner--' + activeVariant()"
                 [class.spinner--sm]="size() === 'sm'"
                 [class.spinner--lg]="size() === 'lg'"
             >
@@ -137,72 +129,6 @@ export type UiSpinnerVariant =
                 display: none;
             }
 
-            .spinner--orbit {
-                border-radius: 50%;
-                animation: orbit-frame 1.15s linear infinite;
-            }
-
-            .spinner--orbit .spinner__core {
-                inset: calc(50% - 0.3rem);
-                width: 0.6rem;
-                height: 0.6rem;
-                border-radius: 50%;
-                background: var(--color-accent);
-            }
-
-            .spinner--orbit .spinner__tile {
-                top: 50%;
-                left: 50%;
-                transform-origin: -0.55rem -0.55rem;
-                border-radius: 50%;
-            }
-
-            .spinner--orbit .spinner__tile--a {
-                animation: orbit-a 0.95s linear infinite;
-            }
-
-            .spinner--orbit .spinner__tile--b {
-                animation: orbit-b 0.95s linear infinite;
-            }
-
-            .spinner--orbit .spinner__tile--c {
-                animation: orbit-c 0.95s linear infinite;
-            }
-
-            .spinner--orbit .spinner__tile--d {
-                animation: orbit-d 0.95s linear infinite;
-            }
-
-            .spinner--conveyor .spinner__core {
-                top: calc(50% - 0.3rem);
-                left: 0.25rem;
-                right: 0.25rem;
-                bottom: auto;
-                height: 0.6rem;
-                border-radius: var(--radius-pill);
-            }
-
-            .spinner--conveyor .spinner__tile {
-                top: calc(50% - 0.35rem);
-                animation: conveyor 1s linear infinite;
-            }
-
-            .spinner--conveyor .spinner__tile--a {
-                animation-delay: 0s;
-            }
-
-            .spinner--conveyor .spinner__tile--b {
-                animation-delay: -0.25s;
-            }
-
-            .spinner--conveyor .spinner__tile--c {
-                animation-delay: -0.5s;
-            }
-
-            .spinner--conveyor .spinner__tile--d {
-                animation-delay: -0.75s;
-            }
-
             .spinner--spring .spinner__core {
                 inset: auto 0.35rem 0.35rem;
                 height: 0.45rem;
@@ -233,34 +159,6 @@ export type UiSpinnerVariant =
             .spinner--spring .spinner__tile--d {
                 right: 0.22rem;
                 animation-delay: -0.36s;
-            }
-
-            .spinner--stamps {
-                animation: frame-wobble 1.05s ease-in-out infinite;
-            }
-
-            .spinner--stamps .spinner__tile--a {
-                top: 0.2rem;
-                left: 0.2rem;
-                animation: stamp-a 1s steps(1, end) infinite;
-            }
-
-            .spinner--stamps .spinner__tile--b {
-                top: 0.2rem;
-                right: 0.2rem;
-                animation: stamp-b 1s steps(1, end) infinite;
-            }
-
-            .spinner--stamps .spinner__tile--c {
-                bottom: 0.2rem;
-                left: 0.2rem;
-                animation: stamp-c 1s steps(1, end) infinite;
-            }
-
-            .spinner--stamps .spinner__tile--d {
-                bottom: 0.2rem;
-                right: 0.2rem;
-                animation: stamp-d 1s steps(1, end) infinite;
             }
 
             .spinner--checker .spinner__core {
@@ -328,66 +226,6 @@ export type UiSpinnerVariant =
                 animation-delay: -0.36s;
             }
 
-            .spinner--burst .spinner__tile {
-                top: 50%;
-                left: 50%;
-                margin-top: calc(var(--tile-size) * -0.5);
-                margin-left: calc(var(--tile-size) * -0.5);
-            }
-
-            .spinner--burst .spinner__tile--a {
-                animation: burst-a 0.95s ease-in-out infinite;
-            }
-
-            .spinner--burst .spinner__tile--b {
-                animation: burst-b 0.95s ease-in-out infinite;
-            }
-
-            .spinner--burst .spinner__tile--c {
-                animation: burst-c 0.95s ease-in-out infinite;
-            }
-
-            .spinner--burst .spinner__tile--d {
-                animation: burst-d 0.95s ease-in-out infinite;
-            }
-
-            .spinner--satellite {
-                border-radius: 50%;
-                animation: satellite-spin 1.2s linear infinite;
-            }
-
-            .spinner--satellite .spinner__core {
-                inset: calc(50% - 0.45rem);
-                width: 0.9rem;
-                height: 0.9rem;
-                border-radius: 0.45rem;
-                background: var(--color-accent);
-            }
-
-            .spinner--satellite .spinner__tile--a {
-                top: 0.12rem;
-                left: calc(50% - 0.35rem);
-                animation: satellite-a 1s ease-in-out infinite;
-            }
-
-            .spinner--satellite .spinner__tile--b {
-                top: calc(50% - 0.35rem);
-                right: 0.12rem;
-                animation: satellite-b 1s ease-in-out infinite;
-            }
-
-            .spinner--satellite .spinner__tile--c {
-                bottom: 0.12rem;
-                left: calc(50% - 0.35rem);
-                animation: satellite-c 1s ease-in-out infinite;
-            }
-
-            .spinner--satellite .spinner__tile--d {
-                top: calc(50% - 0.35rem);
-                left: 0.12rem;
-                animation: satellite-d 1s ease-in-out infinite;
-            }
-
             .spinner--pulse .spinner__core {
                 inset: 0.38rem;
                 animation: pulse-core 0.9s ease-in-out infinite;
@@ -425,12 +263,6 @@ export type UiSpinnerVariant =
 
                 50% {
                     transform: rotate(4deg) translateY(-1px);
-                }
-            }
-
-            @keyframes orbit-frame {
-                to {
-                    transform: rotate(360deg);
                 }
             }
 
@@ -479,62 +311,6 @@ export type UiSpinnerVariant =
                 }
             }
 
-            @keyframes orbit-a {
-                from {
-                    transform: rotate(0deg) translateX(0.75rem);
-                }
-
-                to {
-                    transform: rotate(360deg) translateX(0.75rem);
-                }
-            }
-
-            @keyframes orbit-b {
-                from {
-                    transform: rotate(90deg) translateX(0.75rem);
-                }
-
-                to {
-                    transform: rotate(450deg) translateX(0.75rem);
-                }
-            }
-
-            @keyframes orbit-c {
-                from {
-                    transform: rotate(180deg) translateX(0.75rem);
-                }
-
-                to {
-                    transform: rotate(540deg) translateX(0.75rem);
-                }
-            }
-
-            @keyframes orbit-d {
-                from {
-                    transform: rotate(270deg) translateX(0.75rem);
-                }
-
-                to {
-                    transform: rotate(630deg) translateX(0.75rem);
-                }
-            }
-
-            @keyframes conveyor {
-                0% {
-                    transform: translateX(-0.9rem) scale(0.9);
-                    opacity: 0.4;
-                }
-
-                35% {
-                    opacity: 1;
-                }
-
-                100% {
-                    transform: translateX(2.1rem) scale(1);
-                    opacity: 0.35;
-                }
-            }
-
             @keyframes spring {
                 0%,
                 100% {
@@ -547,82 +323,6 @@ export type UiSpinnerVariant =
 
                 65% {
                     transform: translateY(0.1rem) scaleY(0.92);
-                }
-            }
-
-            @keyframes stamp-a {
-                0%,
-                100% {
-                    transform: translate(0, 0);
-                }
-
-                25% {
-                    transform: translate(1rem, 0.75rem);
-                }
-
-                50% {
-                    transform: translate(1rem, 1.55rem);
-                }
-
-                75% {
-                    transform: translate(0, 1.55rem);
-                }
-            }
-
-            @keyframes stamp-b {
-                0%,
-                100% {
-                    transform: translate(0, 0);
-                }
-
-                25% {
-                    transform: translate(-1rem, 0.75rem);
-                }
-
-                50% {
-                    transform: translate(-1rem, 1.55rem);
-                }
-
-                75% {
-                    transform: translate(0, 1.55rem);
-                }
-            }
-
-            @keyframes stamp-c {
-                0%,
-                100% {
-                    transform: translate(0, 0);
-                }
-
-                25% {
-                    transform: translate(1rem, -0.75rem);
-                }
-
-                50% {
-                    transform: translate(1rem, -1.55rem);
-                }
-
-                75% {
-                    transform: translate(0, -1.55rem);
-                }
-            }
-
-            @keyframes stamp-d {
-                0%,
-                100% {
-                    transform: translate(0, 0);
-                }
-
-                25% {
-                    transform: translate(-1rem, -0.75rem);
-                }
-
-                50% {
-                    transform: translate(-1rem, -1.55rem);
-                }
-
-                75% {
-                    transform: translate(0, -1.55rem);
                 }
             }
 
@@ -656,105 +356,6 @@ export type UiSpinnerVariant =
 
                 50% {
                     transform: translateY(-0.2rem) scaleX(1.12);
-                }
-            }
-
-            @keyframes burst-a {
-                0%,
-                100% {
-                    transform: translate(-0.15rem, -0.15rem) scale(0.9);
-                }
-
-                50% {
-                    transform: translate(-0.95rem, -0.95rem) scale(1);
-                }
-            }
-
-            @keyframes burst-b {
-                0%,
-                100% {
-                    transform: translate(0.15rem, -0.15rem) scale(0.9);
-                }
-
-                50% {
-                    transform: translate(0.95rem, -0.95rem) scale(1);
-                }
-            }
-
-            @keyframes burst-c {
-                0%,
-                100% {
-                    transform: translate(-0.15rem, 0.15rem) scale(0.9);
-                }
-
-                50% {
-                    transform: translate(-0.95rem, 0.95rem) scale(1);
-                }
-            }
-
-            @keyframes burst-d {
-                0%,
-                100% {
-                    transform: translate(0.15rem, 0.15rem) scale(0.9);
-                }
-
-                50% {
-                    transform: translate(0.95rem, 0.95rem) scale(1);
-                }
-            }
-
-            @keyframes satellite-spin {
-                0%,
-                100% {
-                    transform: rotate(-8deg);
-                }
-
-                50% {
-                    transform: rotate(8deg);
-                }
-            }
-
-            @keyframes satellite-a {
-                0%,
-                100% {
-                    transform: translateY(0);
-                }
-
-                50% {
-                    transform: translateY(-0.18rem);
-                }
-            }
-
-            @keyframes satellite-b {
-                0%,
-                100% {
-                    transform: translateX(0);
-                }
-
-                50% {
-                    transform: translateX(0.18rem);
-                }
-            }
-
-            @keyframes satellite-c {
-                0%,
-                100% {
-                    transform: translateY(0);
-                }
-
-                50% {
-                    transform: translateY(0.18rem);
-                }
-            }
-
-            @keyframes satellite-d {
-                0%,
-                100% {
-                    transform: translateX(0);
-                }
-
-                50% {
-                    transform: translateX(-0.18rem);
                 }
             }
 
@@ -797,6 +398,11 @@ export type UiSpinnerVariant =
 })
 export class UiSpinnerComponent {
     public readonly size = input<'sm' | 'md' | 'lg'>('md');
-    public readonly variant = input<UiSpinnerVariant>('tiles');
+    public readonly variant = input<UiSpinnerVariant | null>(null);
     public readonly label = input('');
+
+    private readonly randomVariant =
+        defaultSpinnerVariants[Math.floor(Math.random() * defaultSpinnerVariants.length)];
+
+    protected readonly activeVariant = computed(() => this.variant() ?? this.randomVariant);
 }
