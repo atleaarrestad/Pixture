@@ -28,7 +28,9 @@ The frontend currently uses:
 - Angular CLI workspace in `apps/frontend`
 - Angular 21 packages generated during setup
 - SCSS for styling
-- A minimal landing page that documents the starter layout
+- A shared design system based on centralized tokens in `apps/frontend/src/styles/_design-tokens.scss`
+- Reusable UI components in `apps/frontend/src/app/ui`
+- The index page as a living showcase of the available design primitives
 
 ## Monorepo approach
 

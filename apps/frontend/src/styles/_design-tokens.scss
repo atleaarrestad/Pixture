@@ -1,0 +1,103 @@
+:root {
+    color-scheme: light;
+
+    /* Typography */
+    --font-family-base: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+    --font-family-display: 'Space Grotesk', 'Arial Black', 'Segoe UI', sans-serif;
+    --font-family-mono: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+
+    --font-size-2xs: 0.75rem;
+    --font-size-xs: 0.875rem;
+    --font-size-sm: 1rem;
+    --font-size-md: 1.125rem;
+    --font-size-lg: 1.375rem;
+    --font-size-xl: 1.875rem;
+    --font-size-2xl: 2.5rem;
+    --font-size-3xl: clamp(3rem, 7vw, 5.5rem);
+
+    --line-height-tight: 1.1;
+    --line-height-snug: 1.3;
+    --line-height-base: 1.6;
+    --line-height-relaxed: 1.75;
+
+    --font-weight-regular: 500;
+    --font-weight-semibold: 700;
+    --font-weight-bold: 800;
+
+    /* Core pastel palette */
+    --color-primary: #b9b2ff;
+    --color-primary-strong: #8d82ff;
+    --color-secondary: #8ed8f8;
+    --color-secondary-strong: #58bce9;
+    --color-tertiary: #b9f2cf;
+    --color-tertiary-strong: #7ddca6;
+    --color-accent: #ffe38f;
+    --color-accent-strong: #ffcb57;
+    --color-info: #c5b3ff;
+    --color-success: #bfe67c;
+    --color-warning: #ffcd70;
+    --color-danger: #ff8d8d;
+    --color-neutral: #fff1df;
+
+    /* Neutral surfaces */
+    --color-canvas: #fffaf1;
+    --color-canvas-alt: #fff1df;
+    --color-surface: #fffdf8;
+    --color-surface-muted: #f8f1ff;
+    --color-surface-secondary: #eef9ff;
+    --color-surface-tertiary: #f2fff5;
+
+    /* Ink and borders */
+    --color-ink: #1f1633;
+    --color-ink-soft: #5e5672;
+    --color-border: #1f1633;
+    --color-border-soft: rgba(31, 22, 51, 0.18);
+    --color-focus-ring: #7a6eff;
+
+    /* Semantic aliases */
+    --token-bg-app: var(--color-canvas);
+    --token-bg-panel: var(--color-surface);
+    --token-bg-panel-alt: var(--color-surface-muted);
+    --token-text-primary: var(--color-ink);
+    --token-text-secondary: var(--color-ink-soft);
+    --token-border-strong: var(--color-border);
+    --token-highlight: var(--color-accent);
+
+    /* Sizing and spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+
+    --radius-sm: 0.75rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 1.75rem;
+    --radius-pill: 999px;
+
+    /* Borders and neobrutalist shadows */
+    --border-thin: 2px;
+    --border-medium: 3px;
+    --border-thick: 4px;
+
+    --shadow-neo-xs: 2px 2px 0 0 var(--color-border);
+    --shadow-neo-sm: 4px 4px 0 0 var(--color-border);
+    --shadow-neo-md: 6px 6px 0 0 var(--color-border);
+    --shadow-neo-lg: 10px 10px 0 0 var(--color-border);
+
+    /* Layout widths */
+    --container-page: 78rem;
+    --container-content: 62rem;
+
+    /* Motion */
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+    --duration-slow: 280ms;
+    --easing-standard: ease;
+}

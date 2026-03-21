@@ -4,6 +4,7 @@ Pixture is a plain monorepo starter with:
 
 - `apps/backend/Pixture.Api`: ASP.NET Core Web API with controllers
 - `apps/frontend`: Angular 21 app scaffolded with Angular CLI
+- `apps/frontend/src/app/ui`: reusable frontend component library
 - `.github/copilot-instructions.md`: repository guidance for Copilot and agents
 - `docs/`: project architecture and development notes
 
@@ -66,5 +67,6 @@ npm run backend:run
 ## Documentation
 
 - `docs/architecture.md`
+- `docs/design-system.md`
 - `docs/development.md`
 - `.github/copilot-instructions.md`
