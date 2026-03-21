@@ -70,9 +70,31 @@ export class App {
             value: 'accordion',
             description: 'Progressive disclosure for details.',
         },
-        { label: 'Combobox', value: 'combobox', description: 'Searchable selection input.' },
-        { label: 'Tabs', value: 'tabs', description: 'Quick context switching.' },
-        { label: 'Toast', value: 'toast', description: 'Transient non-blocking feedback.' },
+        {
+            label: 'Combobox',
+            value: 'combobox',
+            description: 'Searchable selection input.',
+        },
+        {
+            label: 'Tabs',
+            value: 'tabs',
+            description: 'Quick context switching.',
+        },
+        {
+            label: 'Toast',
+            value: 'toast',
+            description: 'Transient non-blocking feedback.',
+        },
+        {
+            label: 'Tooltip',
+            value: 'tooltip',
+            description: 'Supportive helper copy on hover or focus.',
+        },
+        {
+            label: 'Card',
+            value: 'card',
+            description: 'Content container with strong neobrutalist framing.',
+        },
     ];
 
     protected readonly accordionItems: UiAccordionItem[] = [
