@@ -1,0 +1,179 @@
+<main class="showcase" [class]="'showcase showcase--' + theme().slug">
+    <section class="hero">
+        <div class="hero__copy">
+            <p class="eyebrow">{{ theme().eyebrow }}</p>
+            <h1>{{ theme().title }}</h1>
+            <p class="lead">{{ theme().lead }}</p>
+
+            <div class="hero__actions">
+                <ui-button size="lg" (pressed)="showToast('primary')">Launch primary action</ui-button>
+                <ui-button variant="secondary" size="lg" (pressed)="showToast('secondary')">
+                    Preview supporting action
+                </ui-button>
+            </div>
+
+            <div class="hero__badges">
+                <ui-badge>Shared components</ui-badge>
+                <ui-badge tone="secondary">Local theme override</ui-badge>
+                <ui-badge tone="tertiary">Route preview</ui-badge>
+            </div>
+        </div>
+
+        <ui-card
+            eyebrow="Palette"
+            [title]="theme().paletteTitle"
+            [subtitle]="theme().paletteSubtitle"
+            tone="accent"
+        >
+            <div class="swatches">
+                @for (swatch of theme().swatches; track swatch.label) {
+                    <div class="swatch" [ngStyle]="{ background: swatch.color }">
+                        <span>{{ swatch.label }}</span>
+                        <code>{{ swatch.code }}</code>
+                    </div>
+                }
+            </div>
+        </ui-card>
+    </section>
+
+    <section class="section-grid">
+        <ui-card
+            eyebrow="Actions"
+            [title]="theme().actionTitle"
+            [subtitle]="theme().actionSubtitle"
+        >
+            <div class="button-row">
+                <ui-button (pressed)="showToast('primary')">Primary</ui-button>
+                <ui-button variant="secondary" (pressed)="showToast('secondary')">Secondary</ui-button>
+                <ui-button variant="tertiary" (pressed)="showToast('tertiary')">Tertiary</ui-button>
+                <ui-button variant="ghost" (pressed)="showToast('neutral')">Ghost</ui-button>
+                <ui-button variant="danger" (pressed)="showToast('danger')">Danger</ui-button>
+            </div>
+
+            <div class="inline-showcase">
+                <ui-badge tone="success">New</ui-badge>
+                <ui-badge tone="warning">Beta</ui-badge>
+                <ui-badge tone="danger">Destructive</ui-badge>
+                <ui-spinner label="Loading preview" />
+                <ui-tooltip content="The same tooltip component is reused on every route.">
+                    <ui-button variant="ghost" size="sm">Hover or focus me</ui-button>
+                </ui-tooltip>
+            </div>
+
+            <div class="button-row">
+                <ui-button variant="secondary" (pressed)="showToast('success')">Show success toast</ui-button>
+                <ui-button variant="tertiary" (pressed)="showToast('warning')">Show warning toast</ui-button>
+            </div>
+        </ui-card>
+
+        <ui-card
+            eyebrow="Forms"
+            [title]="theme().formsTitle"
+            [subtitle]="theme().formsSubtitle"
+            tone="secondary"
+        >
+            <div class="form-grid">
+                <ui-input
+                    label="Project name"
+                    hint="Text input with label and helper copy."
+                    placeholder="Name your product"
+                    [value]="projectName()"
+                    (valueChange)="projectName.set($event)"
+                />
+
+                <ui-select
+                    label="Default experience"
+                    hint="Native select wrapped in the shared visual treatment."
+                    placeholder="Choose a surface"
+                    [options]="showcaseOptions"
+                    [value]="selectedIntent()"
+                    (valueChange)="selectedIntent.set($event)"
+                />
+
+                <ui-combobox
+                    label="Featured component"
+                    hint="Searchable option list for longer datasets."
+                    placeholder="Find a component"
+                    [options]="componentOptions"
+                    [value]="selectedComponent()"
+                    (valueChange)="selectedComponent.set($event)"
+                />
+
+                <ui-textarea
+                    class="form-grid__full"
+                    label="Design notes"
+                    hint="This text area lets you imagine how the route might scale across the product."
+                    placeholder="Write the design intent here"
+                    [value]="notes()"
+                    (valueChange)="notes.set($event)"
+                />
+
+                <ui-checkbox
+                    class="form-grid__full"
+                    label="Keep this route in the shortlist"
+                    hint="The same checkbox is reused under every style direction."
+                    [checked]="wantsUpdates()"
+                    (checkedChange)="wantsUpdates.set($event)"
+                />
+            </div>
+        </ui-card>
+    </section>
+
+    <section class="section-grid section-grid--stacked">
+        <ui-card
+            eyebrow="Disclosure"
+            [title]="theme().disclosureTitle"
+            [subtitle]="theme().disclosureSubtitle"
+            tone="tertiary"
+        >
+            <ui-accordion [items]="accordionItems" />
+        </ui-card>
+
+        <ui-card eyebrow="Navigation" [title]="theme().tabsTitle" [subtitle]="theme().tabsSubtitle">
+            <ui-tabs [items]="tabItems" />
+        </ui-card>
+    </section>
+
+    <section class="section-grid">
+        <ui-card
+            eyebrow="Preview"
+            [title]="theme().previewTitle"
+            [subtitle]="theme().previewSubtitle"
+            tone="accent"
+        >
+            <dl class="summary-list">
+                <div>
+                    <dt>Project name</dt>
+                    <dd>{{ projectName() }}</dd>
+                </div>
+                <div>
+                    <dt>Default experience</dt>
+                    <dd>{{ selectedIntent() }}</dd>
+                </div>
+                <div>
+                    <dt>Featured component</dt>
+                    <dd>{{ selectedComponent() }}</dd>
+                </div>
+                <div>
+                    <dt>Shortlist status</dt>
+                    <dd>{{ wantsUpdates() ? 'Keep reviewing' : 'Not shortlisted' }}</dd>
+                </div>
+            </dl>
+        </ui-card>
+
+        <ui-card
+            eyebrow="Guidance"
+            [title]="theme().guidanceTitle"
+            [subtitle]="theme().guidanceSubtitle"
+        >
+            <ul class="rules-list">
+                <li>Look at the overall mood first.</li>
+                <li>Then check readability across buttons, forms, and content areas.</li>
+                <li>Use the same component set to compare fairly across routes.</li>
+                <li>Pick one direction, then we can make the permanent tokens match it.</li>
+            </ul>
+        </ui-card>
+    </section>
+
+    <ui-toast-stack [toasts]="toasts()" (dismiss)="dismissToast($event)" />
+</main>

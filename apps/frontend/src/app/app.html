@@ -1,198 +1,73 @@
-<main class="showcase">
-    <section class="hero">
-        <div class="hero__copy">
-            <p class="eyebrow">Pastel neobrutalist design system</p>
-            <h1>{{ title() }}</h1>
-            <p class="lead">
-                A reusable Angular UI kit powered by centralized design tokens. Everything on this
-                page is built to become the baseline for the rest of the product.
+<div class="app-shell">
+    <header class="style-nav">
+        <div class="style-nav__copy">
+            <p class="style-nav__eyebrow">Style explorations</p>
+            <h1>Pick a direction to review</h1>
+            <p>
+                Each link opens a full page with the same component set, but a completely different
+                visual treatment.
             </p>
-
-            <div class="hero__actions">
-                <ui-button size="lg" (pressed)="showToast('primary')"
-                    >Launch primary action</ui-button
-                >
-                <ui-button variant="secondary" size="lg" (pressed)="showToast('secondary')">
-                    Preview supporting action
-                </ui-button>
-            </div>
-
-            <div class="hero__badges">
-                <ui-badge>Tokens first</ui-badge>
-                <ui-badge tone="secondary">Reusable components</ui-badge>
-                <ui-badge tone="tertiary">Angular standalone</ui-badge>
-            </div>
         </div>
 
-        <ui-card
-            eyebrow="Palette"
-            title="Core token colors"
-            subtitle="Primary, secondary, tertiary, accent, and semantic tones all come from a single token file."
-            tone="accent"
-        >
-            <div class="swatches">
-                <div class="swatch swatch--primary"><span>Primary</span><code>#ff9db8</code></div>
-                <div class="swatch swatch--secondary">
-                    <span>Secondary</span><code>#8ed8f8</code>
-                </div>
-                <div class="swatch swatch--tertiary"><span>Tertiary</span><code>#b9f2cf</code></div>
-                <div class="swatch swatch--accent"><span>Accent</span><code>#ffe38f</code></div>
-                <div class="swatch swatch--danger"><span>Danger</span><code>#ff8d8d</code></div>
-                <div class="swatch swatch--surface"><span>Surface</span><code>#fffdf8</code></div>
-            </div>
-        </ui-card>
-    </section>
+        <nav class="style-nav__links" aria-label="Style route links">
+            <a
+                routerLink="/"
+                [routerLinkActiveOptions]="{ exact: true }"
+                routerLinkActive="style-link--active"
+                class="style-link"
+            >
+                Current / Neobrutal
+            </a>
+            <a routerLink="/medieval" routerLinkActive="style-link--active" class="style-link">
+                Medieval parchment
+            </a>
+            <a routerLink="/industrial" routerLinkActive="style-link--active" class="style-link">
+                Industrial steampunk
+            </a>
+            <a routerLink="/sky" routerLinkActive="style-link--active" class="style-link">
+                Airy sky
+            </a>
+            <a routerLink="/art-deco" routerLinkActive="style-link--active" class="style-link">
+                Art deco
+            </a>
+            <a routerLink="/apothecary" routerLinkActive="style-link--active" class="style-link">
+                Apothecary
+            </a>
+            <a routerLink="/synthwave" routerLinkActive="style-link--active" class="style-link">
+                Synthwave
+            </a>
+            <a routerLink="/noir" routerLinkActive="style-link--active" class="style-link">
+                Noir
+            </a>
+            <a routerLink="/candy" routerLinkActive="style-link--active" class="style-link">
+                Candy pop
+            </a>
+            <a routerLink="/zen-garden" routerLinkActive="style-link--active" class="style-link">
+                Zen garden
+            </a>
+            <a routerLink="/deep-sea" routerLinkActive="style-link--active" class="style-link">
+                Deep sea
+            </a>
+            <a routerLink="/bio-lab" routerLinkActive="style-link--active" class="style-link">
+                Bio lab
+            </a>
+            <a routerLink="/volcanic" routerLinkActive="style-link--active" class="style-link">
+                Volcanic forge
+            </a>
+            <a routerLink="/paper-cut" routerLinkActive="style-link--active" class="style-link">
+                Paper cut
+            </a>
+            <a routerLink="/terminal" routerLinkActive="style-link--active" class="style-link">
+                Terminal
+            </a>
+            <a routerLink="/lunar" routerLinkActive="style-link--active" class="style-link">
+                Lunar
+            </a>
+            <a routerLink="/gemstone" routerLinkActive="style-link--active" class="style-link">
+                Gemstone
+            </a>
+        </nav>
+    </header>
 
-    <section class="section-grid">
-        <ui-card
-            eyebrow="Actions"
-            title="Buttons, badges, tooltip, spinner, toast"
-            subtitle="Reusable feedback and interaction primitives with shared shapes, borders, and shadows."
-        >
-            <div class="button-row">
-                <ui-button (pressed)="showToast('primary')">Primary</ui-button>
-                <ui-button variant="secondary" (pressed)="showToast('secondary')"
-                    >Secondary</ui-button
-                >
-                <ui-button variant="tertiary" (pressed)="showToast('tertiary')">Tertiary</ui-button>
-                <ui-button variant="ghost" (pressed)="showToast('neutral')">Ghost</ui-button>
-                <ui-button variant="danger" (pressed)="showToast('danger')">Danger</ui-button>
-            </div>
-
-            <div class="inline-showcase">
-                <ui-badge tone="success">New</ui-badge>
-                <ui-badge tone="warning">Beta</ui-badge>
-                <ui-badge tone="danger">Destructive</ui-badge>
-                <ui-spinner label="Loading preview" />
-                <ui-tooltip
-                    content="Tooltips can explain unfamiliar actions without cluttering the layout."
-                >
-                    <ui-button variant="ghost" size="sm">Hover or focus me</ui-button>
-                </ui-tooltip>
-            </div>
-
-            <div class="button-row">
-                <ui-button variant="secondary" (pressed)="showToast('success')"
-                    >Show success toast</ui-button
-                >
-                <ui-button variant="tertiary" (pressed)="showToast('warning')"
-                    >Show warning toast</ui-button
-                >
-            </div>
-        </ui-card>
-
-        <ui-card
-            eyebrow="Forms"
-            title="Inputs and selectors"
-            subtitle="Common form components wired with consistent padding, borders, type scale, and helper text."
-            tone="secondary"
-        >
-            <div class="form-grid">
-                <ui-input
-                    label="Project name"
-                    hint="Text input with label and helper copy."
-                    placeholder="Name your product"
-                    [value]="projectName()"
-                    (valueChange)="projectName.set($event)"
-                />
-
-                <ui-select
-                    label="Default experience"
-                    hint="Native select wrapped in the shared visual treatment."
-                    placeholder="Choose a surface"
-                    [options]="showcaseOptions"
-                    [value]="selectedIntent()"
-                    (valueChange)="selectedIntent.set($event)"
-                />
-
-                <ui-combobox
-                    label="Featured component"
-                    hint="Searchable option list for longer datasets."
-                    placeholder="Find a component"
-                    [options]="componentOptions"
-                    [value]="selectedComponent()"
-                    (valueChange)="selectedComponent.set($event)"
-                />
-
-                <ui-textarea
-                    class="form-grid__full"
-                    label="Design notes"
-                    hint="Textarea styling stays aligned with all other fields."
-                    placeholder="Write the design intent here"
-                    [value]="notes()"
-                    (valueChange)="notes.set($event)"
-                />
-
-                <ui-checkbox
-                    class="form-grid__full"
-                    label="Send me updates when the component library grows"
-                    hint="Shared checkbox styling keeps forms visually consistent."
-                    [checked]="wantsUpdates()"
-                    (checkedChange)="wantsUpdates.set($event)"
-                />
-            </div>
-        </ui-card>
-    </section>
-
-    <section class="section-grid section-grid--stacked">
-        <ui-card
-            eyebrow="Disclosure"
-            title="Accordion"
-            subtitle="Useful for FAQ sections, sidebars, and expandable detail panels."
-            tone="tertiary"
-        >
-            <ui-accordion [items]="accordionItems" />
-        </ui-card>
-
-        <ui-card
-            eyebrow="Navigation"
-            title="Tabs"
-            subtitle="A compact way to switch between related content."
-        >
-            <ui-tabs [items]="tabItems" />
-        </ui-card>
-    </section>
-
-    <section class="section-grid">
-        <ui-card
-            eyebrow="Preview"
-            title="Current state snapshot"
-            subtitle="These values are live examples of the reusable components above."
-            tone="accent"
-        >
-            <dl class="summary-list">
-                <div>
-                    <dt>Project name</dt>
-                    <dd>{{ projectName() }}</dd>
-                </div>
-                <div>
-                    <dt>Default experience</dt>
-                    <dd>{{ selectedIntent() }}</dd>
-                </div>
-                <div>
-                    <dt>Featured component</dt>
-                    <dd>{{ selectedComponent() }}</dd>
-                </div>
-                <div>
-                    <dt>Updates enabled</dt>
-                    <dd>{{ wantsUpdates() ? 'Yes' : 'No' }}</dd>
-                </div>
-            </dl>
-        </ui-card>
-
-        <ui-card
-            eyebrow="Guidance"
-            title="How to extend this"
-            subtitle="The next components should follow the same rule set."
-        >
-            <ul class="rules-list">
-                <li>Always pull visual values from the token file.</li>
-                <li>Reuse these primitives before creating page-specific one-offs.</li>
-                <li>Keep components composable and broadly useful.</li>
-                <li>When new patterns emerge, add them to the shared library and docs.</li>
-            </ul>
-        </ui-card>
-    </section>
-
-    <ui-toast-stack [toasts]="toasts()" (dismiss)="dismissToast($event)" />
-</main>
+    <router-outlet />
+</div>

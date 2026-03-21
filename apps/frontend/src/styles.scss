@@ -1,6 +1,6 @@
 @use './styles/design-tokens';
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;700&family=Libre+Baskerville:wght@400;700&family=Manrope:wght@400;500;700;800&family=Marcellus&family=Orbitron:wght@400;600;700&family=Oswald:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Source+Sans+3:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 html {
     font-size: 16px;
@@ -17,6 +17,9 @@ body {
     font-family: var(--font-family-base);
     color: var(--token-text-primary);
     background-color: var(--token-bg-app);
+}
+
+body[data-theme='default'] {
     background-image:
         linear-gradient(rgba(31, 22, 51, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(31, 22, 51, 0.05) 1px, transparent 1px),
@@ -29,6 +32,121 @@ body {
         auto,
         auto,
         auto;
+}
+
+body[data-theme='medieval'] {
+    background:
+        radial-gradient(circle at top, rgba(255, 246, 221, 0.22), transparent 30%),
+        linear-gradient(180deg, rgba(123, 102, 77, 0.2), rgba(123, 102, 77, 0.05)),
+        linear-gradient(180deg, #bca98a 0%, #9d8a6d 100%);
+}
+
+body[data-theme='industrial'] {
+    background:
+        radial-gradient(circle at top, rgba(215, 163, 90, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(35, 31, 27, 0.12), rgba(35, 31, 27, 0.04)),
+        linear-gradient(180deg, #7d848f 0%, #5a616b 100%);
+}
+
+body[data-theme='sky'] {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 26%),
+        radial-gradient(circle at top right, rgba(255, 215, 199, 0.35), transparent 22%),
+        linear-gradient(180deg, #dff1ff 0%, #eef7ff 52%, #f8f4ff 100%);
+}
+
+body[data-theme='art-deco'] {
+    background:
+        radial-gradient(circle at top, rgba(209, 176, 111, 0.18), transparent 26%),
+        linear-gradient(180deg, #27211d 0%, #151210 100%);
+}
+
+body[data-theme='apothecary'] {
+    background:
+        radial-gradient(circle at top left, rgba(201, 152, 82, 0.14), transparent 24%),
+        linear-gradient(180deg, rgba(152, 164, 139, 0.12), rgba(152, 164, 139, 0.04)),
+        linear-gradient(180deg, #e9ddc9 0%, #d8c7af 100%);
+}
+
+body[data-theme='synthwave'] {
+    background:
+        radial-gradient(circle at top left, rgba(255, 79, 216, 0.22), transparent 24%),
+        radial-gradient(circle at top right, rgba(75, 227, 255, 0.18), transparent 24%),
+        linear-gradient(180deg, #1b1341 0%, #0f0c26 100%);
+}
+
+body[data-theme='noir'] {
+    background:
+        radial-gradient(circle at top, rgba(199, 164, 91, 0.12), transparent 26%),
+        linear-gradient(180deg, rgba(111, 45, 63, 0.08), rgba(111, 45, 63, 0.02)),
+        linear-gradient(180deg, #201917 0%, #0f0c0c 100%);
+}
+
+body[data-theme='candy'] {
+    background:
+        radial-gradient(circle at top left, rgba(255, 158, 203, 0.4), transparent 24%),
+        radial-gradient(circle at top right, rgba(141, 185, 255, 0.36), transparent 24%),
+        linear-gradient(180deg, #fff7f7 0%, #fff6d8 100%);
+}
+
+body[data-theme='zen-garden'] {
+    background:
+        radial-gradient(circle at top, rgba(157, 164, 140, 0.18), transparent 26%),
+        linear-gradient(180deg, rgba(214, 208, 197, 0.24), rgba(214, 208, 197, 0.08)),
+        linear-gradient(180deg, #f4f0e7 0%, #ece6db 100%);
+}
+
+body[data-theme='deep-sea'] {
+    background:
+        radial-gradient(circle at top left, rgba(114, 236, 255, 0.16), transparent 22%),
+        radial-gradient(circle at top right, rgba(46, 163, 161, 0.16), transparent 24%),
+        linear-gradient(180deg, #0d2535 0%, #07111a 100%);
+}
+
+body[data-theme='bio-lab'] {
+    background:
+        radial-gradient(circle at top, rgba(129, 216, 191, 0.18), transparent 24%),
+        linear-gradient(180deg, rgba(156, 242, 121, 0.1), rgba(156, 242, 121, 0.02)),
+        linear-gradient(180deg, #edf5f1 0%, #dfe9e4 100%);
+}
+
+body[data-theme='volcanic'] {
+    background:
+        radial-gradient(circle at top, rgba(255, 122, 47, 0.2), transparent 24%),
+        radial-gradient(circle at bottom, rgba(196, 59, 32, 0.16), transparent 28%),
+        linear-gradient(180deg, #261915 0%, #0f0b0a 100%);
+}
+
+body[data-theme='paper-cut'] {
+    background:
+        radial-gradient(circle at top left, rgba(255, 107, 95, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(79, 117, 255, 0.16), transparent 24%),
+        linear-gradient(180deg, #fff4df 0%, #ffeec7 100%);
+}
+
+body[data-theme='terminal'] {
+    background:
+        linear-gradient(rgba(141, 255, 142, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(141, 255, 142, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, #0a140c 0%, #040805 100%);
+    background-size:
+        26px 26px,
+        26px 26px,
+        auto;
+}
+
+body[data-theme='lunar'] {
+    background:
+        radial-gradient(circle at top left, rgba(216, 210, 255, 0.38), transparent 22%),
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.38), transparent 20%),
+        linear-gradient(180deg, #f2f3fb 0%, #e9e9f6 100%);
+}
+
+body[data-theme='gemstone'] {
+    background:
+        radial-gradient(circle at top left, rgba(138, 77, 255, 0.18), transparent 22%),
+        radial-gradient(circle at top right, rgba(255, 62, 112, 0.14), transparent 22%),
+        linear-gradient(180deg, #251f39 0%, #110f1b 100%);
 }
 
 button,

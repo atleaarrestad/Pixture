@@ -1,0 +1,233 @@
+<main class="exploration">
+    <section class="hero">
+        <div class="hero__copy">
+            <p class="eyebrow">{{ config.eyebrow }}</p>
+            <h1>{{ config.title }}</h1>
+            <p class="lead">{{ config.lead }}</p>
+            <div class="hero__actions">
+                <button type="button" class="action action--primary" (click)="showToast('primary')">
+                    Primary action
+                </button>
+                <button
+                    type="button"
+                    class="action action--secondary"
+                    (click)="showToast('secondary')"
+                >
+                    Secondary action
+                </button>
+                <button type="button" class="action action--ghost" (click)="showToast('neutral')">
+                    Neutral toast
+                </button>
+            </div>
+            <div class="badge-row">
+                <span class="badge">custom route</span>
+                <span class="badge badge--secondary">same content</span>
+                <span class="badge badge--tertiary">different components</span>
+            </div>
+        </div>
+
+        <section class="panel panel--palette">
+            <p class="panel__eyebrow">Palette</p>
+            <h2>{{ config.paletteTitle }}</h2>
+            <p class="panel__subtitle">{{ config.paletteSubtitle }}</p>
+
+            <div class="swatches">
+                @for (swatch of config.swatches; track swatch.label) {
+                    <article class="swatch" [style.background]="swatch.color">
+                        <span>{{ swatch.label }}</span>
+                        <code>{{ swatch.code }}</code>
+                    </article>
+                }
+            </div>
+        </section>
+    </section>
+
+    <section class="grid">
+        <section class="panel">
+            <p class="panel__eyebrow">Actions</p>
+            <h2>{{ config.actionTitle }}</h2>
+            <p class="panel__subtitle">{{ config.actionSubtitle }}</p>
+
+            <div class="button-row">
+                <button type="button" class="action action--primary" (click)="showToast('primary')">
+                    Primary
+                </button>
+                <button
+                    type="button"
+                    class="action action--secondary"
+                    (click)="showToast('secondary')"
+                >
+                    Secondary
+                </button>
+                <button
+                    type="button"
+                    class="action action--tertiary"
+                    (click)="showToast('tertiary')"
+                >
+                    Tertiary
+                </button>
+                <button type="button" class="action action--danger" (click)="showToast('danger')">
+                    Danger
+                </button>
+            </div>
+
+            <div class="inline-elements">
+                <span class="badge badge--success">New</span>
+                <span class="badge badge--warning">Beta</span>
+                <span class="badge badge--danger">Destructive</span>
+                <span class="spinner" aria-hidden="true"></span>
+                <span class="tooltip-anchor">
+                    <button type="button" class="action action--ghost action--small">Hover me</button>
+                    <span class="tooltip-copy">Style-specific tooltip preview</span>
+                </span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <p class="panel__eyebrow">Forms</p>
+            <h2>{{ config.formsTitle }}</h2>
+            <p class="panel__subtitle">{{ config.formsSubtitle }}</p>
+
+            <div class="form-grid">
+                <label class="field">
+                    <span>Project name</span>
+                    <input type="text" [value]="projectName()" (input)="updateProjectName($event)" />
+                </label>
+
+                <label class="field">
+                    <span>Default experience</span>
+                    <select
+                        [value]="selectedIntent()"
+                        (change)="updateSelectedIntent($event)"
+                    >
+                        @for (option of intentOptions; track option) {
+                            <option [value]="option">{{ option }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Featured component</span>
+                    <input
+                        list="component-options"
+                        [value]="selectedComponent()"
+                        (input)="updateSelectedComponent($event)"
+                    />
+                    <datalist id="component-options">
+                        @for (option of componentOptions; track option) {
+                            <option [value]="option"></option>
+                        }
+                    </datalist>
+                </label>
+
+                <label class="field field--full">
+                    <span>Design notes</span>
+                    <textarea
+                        [value]="notes()"
+                        (input)="updateNotes($event)"
+                    ></textarea>
+                </label>
+
+                <label class="check field--full">
+                    <input
+                        type="checkbox"
+                        [checked]="keepShortlist()"
+                        (change)="updateKeepShortlist($event)"
+                    />
+                    <span class="check__copy">Keep this direction in the shortlist</span>
+                </label>
+            </div>
+        </section>
+    </section>
+
+    <section class="grid">
+        <section class="panel">
+            <p class="panel__eyebrow">Disclosure</p>
+            <h2>Accordion</h2>
+            <div class="accordion">
+                @for (item of config.accordionItems; track item.title) {
+                    <details class="accordion__item">
+                        <summary>{{ item.title }}</summary>
+                        <p>{{ item.content }}</p>
+                    </details>
+                }
+            </div>
+        </section>
+
+        <section class="panel">
+            <p class="panel__eyebrow">Navigation</p>
+            <h2>Tabs</h2>
+            <div class="tabs">
+                <div class="tabs__list">
+                    @for (tab of config.tabs; track tab.label; let index = $index) {
+                        <button
+                            type="button"
+                            class="tabs__trigger"
+                            [class.tabs__trigger--active]="activeTab() === index"
+                            (click)="activeTab.set(index)"
+                        >
+                            {{ tab.label }}
+                        </button>
+                    }
+                </div>
+
+                <article class="tabs__panel">
+                    <h3>{{ config.tabs[activeTab()].title }}</h3>
+                    <p>{{ config.tabs[activeTab()].body }}</p>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <section class="grid">
+        <section class="panel">
+            <p class="panel__eyebrow">Preview</p>
+            <h2>{{ config.previewTitle }}</h2>
+            <p class="panel__subtitle">{{ config.previewSubtitle }}</p>
+
+            <dl class="summary-list">
+                <div>
+                    <dt>Project name</dt>
+                    <dd>{{ projectName() }}</dd>
+                </div>
+                <div>
+                    <dt>Default experience</dt>
+                    <dd>{{ selectedIntent() }}</dd>
+                </div>
+                <div>
+                    <dt>Featured component</dt>
+                    <dd>{{ selectedComponent() }}</dd>
+                </div>
+                <div>
+                    <dt>Shortlist status</dt>
+                    <dd>{{ keepShortlist() ? 'Keep reviewing' : 'Reject this route' }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="panel">
+            <p class="panel__eyebrow">Guidance</p>
+            <h2>{{ config.guidanceTitle }}</h2>
+            <p class="panel__subtitle">{{ config.guidanceSubtitle }}</p>
+            <ul class="rules-list">
+                @for (point of config.guidancePoints; track point) {
+                    <li>{{ point }}</li>
+                }
+            </ul>
+        </section>
+    </section>
+
+    <aside class="toast-stack">
+        @for (toast of toasts(); track toast.id) {
+            <article class="toast" [class]="'toast toast--' + toast.tone">
+                <div class="toast__copy">
+                    <h4>{{ toast.title }}</h4>
+                    <p>{{ toast.message }}</p>
+                </div>
+                <button type="button" class="toast__dismiss" (click)="dismissToast(toast.id)">
+                    <fa-icon [icon]="closeIcon" />
+                </button>
+            </article>
+        }
+    </aside>
+</main>
