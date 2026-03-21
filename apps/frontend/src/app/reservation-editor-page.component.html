@@ -191,11 +191,108 @@
                                     accept="image/*"
                                     (change)="importImageFromFile($event)"
                                 />
+                                @if (hasStagedImport()) {
+                                    <button
+                                        type="button"
+                                        class="editor-controls__custom-button"
+                                        (click)="applyStagedImageImport()"
+                                    >
+                                        Apply import
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="editor-controls__custom-button editor-controls__custom-button--ghost"
+                                        (click)="clearImageImport()"
+                                    >
+                                        Clear setup
+                                    </button>
+                                }
                             </div>
                             <p class="editor-controls__hint">
-                                The image is resized to your reservation and replaces the current pixels. Transparent
-                                areas are cleared to the reservation background color.
+                                Upload now opens an import setup step so you can preview the result before it touches
+                                your reservation.
                             </p>
+
+                            @if (hasStagedImport() && importImageSize(); as importImageSize) {
+                                <div class="editor-import">
+                                    <div class="editor-import__summary">
+                                        <strong>{{ importImageName() }}</strong>
+                                        <span>{{ importImageSize.width }} x {{ importImageSize.height }} source</span>
+                                        <span>Target {{ editor.width }} x {{ editor.height }}</span>
+                                    </div>
+
+                                    <div class="editor-import__modes">
+                                        <button
+                                            type="button"
+                                            class="editor-import__mode-button"
+                                            [class.editor-import__mode-button--active]="importMode() === 'cover'"
+                                            (click)="setImportMode('cover')"
+                                        >
+                                            Fill crop
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="editor-import__mode-button"
+                                            [class.editor-import__mode-button--active]="importMode() === 'contain'"
+                                            (click)="setImportMode('contain')"
+                                        >
+                                            Fit whole image
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="editor-import__mode-button"
+                                            [class.editor-import__mode-button--active]="importMode() === 'stretch'"
+                                            (click)="setImportMode('stretch')"
+                                        >
+                                            Stretch
+                                        </button>
+                                    </div>
+
+                                    <p class="editor-controls__hint">{{ importModeSummary() }}</p>
+
+                                    <div class="editor-import__preview-shell">
+                                        <canvas #importPreviewCanvas class="editor-import__preview"></canvas>
+                                    </div>
+
+                                    <div class="editor-import__sliders">
+                                        <ui-slider
+                                            label="Crop horizontal"
+                                            hint="Move the image left or right inside the reservation."
+                                            [value]="importFocusX()"
+                                            [min]="0"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            [disabled]="importMode() === 'stretch'"
+                                            (valueChange)="setImportFocusX($event)"
+                                        />
+
+                                        <ui-slider
+                                            label="Crop vertical"
+                                            hint="Move the image up or down inside the reservation."
+                                            [value]="importFocusY()"
+                                            [min]="0"
+                                            [max]="100"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            [disabled]="importMode() === 'stretch'"
+                                            (valueChange)="setImportFocusY($event)"
+                                        />
+
+                                        <ui-slider
+                                            label="Import zoom"
+                                            hint="Zoom in to crop more tightly or zoom out to show more of the image."
+                                            [value]="importZoom()"
+                                            [min]="100"
+                                            [max]="300"
+                                            [step]="1"
+                                            valueSuffix="%"
+                                            [disabled]="importMode() === 'stretch'"
+                                            (valueChange)="setImportZoom($event)"
+                                        />
+                                    </div>
+                                </div>
+                            }
                         </div>
 
                         <div class="editor-controls__section">

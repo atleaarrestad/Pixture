@@ -25,6 +25,7 @@ interface RecentColorEntry {
 }
 
 type DrawTool = 'brush' | 'bucket' | 'line';
+type ImportMode = 'cover' | 'contain' | 'stretch';
 
 const EMPTY_PIXEL_COLOR = '#fffdf8';
 
@@ -55,6 +56,12 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     @ViewChild('imageUploadInput')
     private imageUploadInput?: ElementRef<HTMLInputElement>;
 
+    @ViewChild('importPreviewCanvas')
+    private set importPreviewCanvasRef(value: ElementRef<HTMLCanvasElement> | undefined) {
+        this.importPreviewCanvas = value;
+        this.renderImportPreview();
+    }
+
     private readonly route = inject(ActivatedRoute);
     private readonly canvasApi = inject(CanvasApiService);
 
@@ -71,6 +78,23 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly isImporting = signal(false);
     protected readonly loadError = signal<string | null>(null);
     protected readonly saveMessage = signal<string | null>(null);
+    protected readonly importImageName = signal<string | null>(null);
+    protected readonly importImageSize = signal<{ width: number; height: number } | null>(null);
+    protected readonly importMode = signal<ImportMode>('cover');
+    protected readonly importFocusX = signal(50);
+    protected readonly importFocusY = signal(50);
+    protected readonly importZoom = signal(100);
+    protected readonly hasStagedImport = computed(() => this.importImageName() !== null);
+    protected readonly importModeSummary = computed(() => {
+        switch (this.importMode()) {
+            case 'contain':
+                return 'Fit the whole image without distortion.';
+            case 'stretch':
+                return 'Fill the reservation exactly, even if it distorts the image.';
+            default:
+                return 'Fill the reservation without distortion, cropping the overflow.';
+        }
+    });
     protected readonly hasUnsavedChanges = computed(() => {
         const editor = this.editor();
         if (!editor) {
@@ -117,6 +141,8 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     private hasPendingStrokeSnapshot = false;
     private hasViewInitialized = false;
     private editorCanvas?: ElementRef<HTMLCanvasElement>;
+    private importPreviewCanvas?: ElementRef<HTMLCanvasElement>;
+    private stagedImportImage: HTMLImageElement | null = null;
     private readonly pixelHistory = signal<string[][]>([]);
     private readonly lineStart = signal<{ x: number; y: number } | null>(null);
     private readonly linePreviewEnd = signal<{ x: number; y: number } | null>(null);
@@ -228,10 +254,58 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             return;
         }
 
-        await this.applyImageImport(file);
+        await this.stageImageImport(file);
         if (element) {
             element.value = '';
         }
+    }
+
+    protected setImportMode(mode: ImportMode): void {
+        this.importMode.set(mode);
+        this.renderImportPreview();
+    }
+
+    protected setImportFocusX(value: number): void {
+        this.importFocusX.set(value);
+        this.renderImportPreview();
+    }
+
+    protected setImportFocusY(value: number): void {
+        this.importFocusY.set(value);
+        this.renderImportPreview();
+    }
+
+    protected setImportZoom(value: number): void {
+        this.importZoom.set(value);
+        this.renderImportPreview();
+    }
+
+    protected clearImageImport(): void {
+        this.clearImageImportState();
+        this.saveMessage.set(null);
+    }
+
+    protected applyStagedImageImport(): void {
+        const editor = this.editor();
+        if (!editor || !this.stagedImportImage) {
+            return;
+        }
+
+        const currentPixels = this.pixels();
+        const importedPixels = this.createImportedPixels(editor.width, editor.height);
+        const changedCount = importedPixels.reduce((count, color, index) => {
+            return color === currentPixels[index] ? count : count + 1;
+        }, 0);
+
+        if (changedCount === 0) {
+            this.saveMessage.set('The current import preview already matches the reservation pixels.');
+            return;
+        }
+
+        this.pushUndoSnapshot();
+        this.pixels.set(importedPixels);
+        this.renderCanvas();
+        this.saveMessage.set(`Applied imported image to ${changedCount} pixels. Review it, then save changes.`);
     }
 
     protected hasExternalLink(editor: ReservationEditorData): boolean {
@@ -329,12 +403,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         }
     }
 
-    private async applyImageImport(file: File): Promise<void> {
-        const editor = this.editor();
-        if (!editor) {
-            return;
-        }
-
+    private async stageImageImport(file: File): Promise<void> {
         if (!file.type.startsWith('image/')) {
             this.saveMessage.set('Please choose an image file to import.');
             return;
@@ -348,22 +417,16 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.linePreviewEnd.set(null);
 
         try {
-            const currentPixels = this.pixels();
-            const importedPixels = await this.resizeImageToPixels(file, editor.width, editor.height);
-            const changedCount = importedPixels.reduce((count, color, index) => {
-                return color === currentPixels[index] ? count : count + 1;
-            }, 0);
-
-            if (changedCount === 0) {
-                this.renderCanvas();
-                this.saveMessage.set('Imported image already matches the current pixels.');
-                return;
-            }
-
-            this.pushUndoSnapshot();
-            this.pixels.set(importedPixels);
-            this.renderCanvas();
-            this.saveMessage.set(`Imported image into ${changedCount} pixels. Review it, then save changes.`);
+            const image = await this.loadImageFile(file);
+            this.stagedImportImage = image;
+            this.importImageName.set(file.name);
+            this.importImageSize.set({ width: image.naturalWidth, height: image.naturalHeight });
+            this.importMode.set('cover');
+            this.importFocusX.set(50);
+            this.importFocusY.set(50);
+            this.importZoom.set(100);
+            this.renderImportPreview();
+            this.saveMessage.set('Preview the import below, adjust the crop if needed, then apply it.');
         } catch (error: unknown) {
             this.saveMessage.set(this.getImageImportErrorMessage(error));
         } finally {
@@ -546,12 +609,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.renderLinePreview(context, editor.width, editor.height, zoom);
     }
 
-    private async resizeImageToPixels(
-        file: File,
-        width: number,
-        height: number,
-    ): Promise<string[]> {
-        const image = await this.loadImageFile(file);
+    private createImportedPixels(width: number, height: number): string[] {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
@@ -561,10 +619,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             throw new Error('Could not prepare the image importer.');
         }
 
-        context.clearRect(0, 0, width, height);
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = 'high';
-        context.drawImage(image, 0, 0, width, height);
+        this.renderImportedImageToContext(context, width, height);
 
         const imageData = context.getImageData(0, 0, width, height).data;
         const nextPixels = Array.from({ length: width * height }, () => EMPTY_PIXEL_COLOR);
@@ -665,6 +720,92 @@ export class ReservationEditorPageComponent implements AfterViewInit {
 
             image.src = objectUrl;
         });
+    }
+
+    private renderImportPreview(): void {
+        const editor = this.editor();
+        const previewCanvas = this.importPreviewCanvas?.nativeElement;
+        if (!editor || !previewCanvas || !this.stagedImportImage) {
+            return;
+        }
+
+        previewCanvas.width = editor.width;
+        previewCanvas.height = editor.height;
+
+        const context = previewCanvas.getContext('2d');
+        if (!context) {
+            return;
+        }
+
+        this.renderImportedImageToContext(context, editor.width, editor.height);
+    }
+
+    private renderImportedImageToContext(
+        context: CanvasRenderingContext2D,
+        targetWidth: number,
+        targetHeight: number,
+    ): void {
+        const image = this.stagedImportImage;
+        if (!image) {
+            return;
+        }
+
+        context.clearRect(0, 0, targetWidth, targetHeight);
+        context.fillStyle = EMPTY_PIXEL_COLOR;
+        context.fillRect(0, 0, targetWidth, targetHeight);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+
+        const placement = this.getImportPlacement(image.naturalWidth, image.naturalHeight, targetWidth, targetHeight);
+        context.drawImage(image, placement.offsetX, placement.offsetY, placement.drawWidth, placement.drawHeight);
+    }
+
+    private getImportPlacement(
+        sourceWidth: number,
+        sourceHeight: number,
+        targetWidth: number,
+        targetHeight: number,
+    ): {
+        drawWidth: number;
+        drawHeight: number;
+        offsetX: number;
+        offsetY: number;
+    } {
+        if (this.importMode() === 'stretch') {
+            return {
+                drawWidth: targetWidth,
+                drawHeight: targetHeight,
+                offsetX: 0,
+                offsetY: 0,
+            };
+        }
+
+        const baseScale = this.importMode() === 'contain'
+            ? Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)
+            : Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);
+        const zoomFactor = this.importZoom() / 100;
+        const scale = baseScale * zoomFactor;
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        const offsetX = (targetWidth - drawWidth) * (this.importFocusX() / 100);
+        const offsetY = (targetHeight - drawHeight) * (this.importFocusY() / 100);
+
+        return {
+            drawWidth,
+            drawHeight,
+            offsetX,
+            offsetY,
+        };
+    }
+
+    private clearImageImportState(): void {
+        this.stagedImportImage = null;
+        this.importImageName.set(null);
+        this.importImageSize.set(null);
+        this.importMode.set('cover');
+        this.importFocusX.set(50);
+        this.importFocusY.set(50);
+        this.importZoom.set(100);
     }
 
     private hexToRgb(color: string): { red: number; green: number; blue: number } {

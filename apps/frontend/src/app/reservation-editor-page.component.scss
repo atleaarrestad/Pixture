@@ -271,9 +271,17 @@
     cursor: pointer;
 }
 
+.editor-controls__custom-button:hover {
+    transform: translate(-1px, -1px);
+}
+
 .editor-controls__custom-button:disabled {
     cursor: wait;
     opacity: 0.72;
+}
+
+.editor-controls__custom-button--ghost {
+    background: var(--color-canvas-alt);
 }
 
 .editor-controls__custom-swatch {
@@ -295,6 +303,79 @@
 
 .editor-controls__actions fa-icon {
     font-size: 0.9rem;
+}
+
+.editor-import {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.editor-import__summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    color: var(--token-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.editor-import__summary strong {
+    color: var(--token-text-primary);
+    font-family: var(--font-family-display);
+}
+
+.editor-import__modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.editor-import__mode-button {
+    min-height: 2.5rem;
+    padding: 0.55rem 0.85rem;
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-neo-xs);
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+}
+
+.editor-import__mode-button--active {
+    background: var(--color-primary);
+}
+
+.editor-import__preview-shell {
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    padding: var(--space-3);
+    border: 1px solid rgba(31, 22, 51, 0.16);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(45deg, rgba(31, 22, 51, 0.05) 25%, transparent 25%, transparent 75%, rgba(31, 22, 51, 0.05) 75%),
+        linear-gradient(45deg, rgba(31, 22, 51, 0.05) 25%, transparent 25%, transparent 75%, rgba(31, 22, 51, 0.05) 75%);
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+}
+
+.editor-import__preview {
+    display: block;
+    width: min(100%, 18rem);
+    height: auto;
+    image-rendering: pixelated;
+    border: var(--border-medium) solid var(--token-border-strong);
+    background: #fffdf8;
+}
+
+.editor-import__sliders {
+    display: grid;
+    gap: var(--space-3);
 }
 
 .editor-page__url {
