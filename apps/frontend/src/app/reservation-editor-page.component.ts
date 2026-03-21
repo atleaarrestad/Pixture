@@ -1,3 +1,5 @@
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faBrush, faFillDrip, faRotateLeft, faSlash } from '@fortawesome/free-solid-svg-icons';
 import {
     AfterViewInit,
     Component,
@@ -26,7 +28,15 @@ type DrawTool = 'brush' | 'bucket' | 'line';
 
 @Component({
     selector: 'app-reservation-editor-page',
-    imports: [FormsModule, RouterLink, UiButtonComponent, UiCardComponent, UiSliderComponent, UiSpinnerComponent],
+    imports: [
+        FontAwesomeModule,
+        FormsModule,
+        RouterLink,
+        UiButtonComponent,
+        UiCardComponent,
+        UiSliderComponent,
+        UiSpinnerComponent,
+    ],
     templateUrl: './reservation-editor-page.component.html',
     styleUrl: './reservation-editor-page.component.scss',
 })
@@ -99,6 +109,10 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     private readonly pixelHistory = signal<string[][]>([]);
     private readonly lineStart = signal<{ x: number; y: number } | null>(null);
     private nextRecentColorId = 1;
+    protected readonly brushIcon = faBrush;
+    protected readonly bucketIcon = faFillDrip;
+    protected readonly lineIcon = faSlash;
+    protected readonly undoIcon = faRotateLeft;
 
     public async ngAfterViewInit(): Promise<void> {
         this.hasViewInitialized = true;
