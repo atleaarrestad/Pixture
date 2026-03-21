@@ -22,6 +22,9 @@
 
             <div class="editor-page__hero-actions">
                 <a routerLink="/" class="editor-page__link-button">Back to board</a>
+                <ui-button variant="ghost" [disabled]="!canUndo()" (pressed)="undoLastStroke()">
+                    Undo
+                </ui-button>
                 <ui-button
                     variant="secondary"
                     [disabled]="!hasUnsavedChanges() || isSaving()"
@@ -91,30 +94,59 @@
                                     ></button>
                                 }
                             </div>
-                            <label class="editor-controls__custom">
-                                <span>Custom</span>
+                            <div class="editor-controls__actions">
+                                <button
+                                    type="button"
+                                    class="editor-controls__custom-button"
+                                    (click)="openCustomColorPicker()"
+                                >
+                                    <span
+                                        class="editor-controls__custom-swatch"
+                                        [style.background]="selectedColor()"
+                                    ></span>
+                                    Pick custom color
+                                </button>
                                 <input
+                                    #customColorPicker
+                                    class="editor-controls__custom-input"
                                     type="color"
-                                    [ngModel]="selectedColor()"
-                                    (ngModelChange)="selectedColor.set($event)"
+                                    [value]="selectedColor()"
+                                    (change)="applyCustomColor($event)"
                                 />
-                            </label>
+                            </div>
                         </div>
 
                         <div class="editor-controls__section">
-                            <span class="editor-controls__label">Zoom</span>
-                            <div class="editor-toolbar__zoom-actions">
-                                @for (zoomOption of [12, 18, 24]; track zoomOption) {
-                                    <button
-                                        type="button"
-                                        class="editor-toolbar__zoom-button"
-                                        [class.editor-toolbar__zoom-button--active]="zoom() === zoomOption"
-                                        (click)="setZoom(zoomOption)"
-                                    >
-                                        {{ zoomOption }}x
-                                    </button>
+                            <span class="editor-controls__label">Recent colors</span>
+                            <div class="editor-controls__palette">
+                                @if (recentColors().length === 0) {
+                                    <span class="editor-page__muted">Your last 5 picked colors will show here.</span>
+                                } @else {
+                                    @for (recentColor of recentColors(); track recentColor.id) {
+                                        <button
+                                            type="button"
+                                            class="editor-controls__swatch"
+                                            [class.editor-controls__swatch--active]="selectedColor() === recentColor.color"
+                                            [style.background]="recentColor.color"
+                                            [attr.aria-label]="'Select recent color ' + recentColor.color"
+                                            (click)="useRecentColor(recentColor.color)"
+                                        ></button>
+                                    }
                                 }
                             </div>
+                        </div>
+
+                        <div class="editor-controls__section">
+                            <ui-slider
+                                label="Zoom"
+                                hint="Drag to scale the editor from 1x to 50x."
+                                [value]="zoom()"
+                                [min]="1"
+                                [max]="50"
+                                [step]="1"
+                                valueSuffix="x"
+                                (valueChange)="setZoom($event)"
+                            />
                         </div>
                     </div>
 

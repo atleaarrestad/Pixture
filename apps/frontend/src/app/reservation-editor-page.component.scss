@@ -76,9 +76,14 @@
     align-items: start;
 }
 
+.editor-page__grid > * {
+    min-width: 0;
+}
+
 .editor-page__canvas-card,
 .editor-page__sidebar {
     display: block;
+    min-width: 0;
 }
 
 .editor-page__sidebar {
@@ -95,30 +100,9 @@
     font-size: var(--font-size-sm);
 }
 
-.editor-toolbar__zoom-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.editor-toolbar__zoom-button {
-    min-height: 2.5rem;
-    padding: 0.65rem 0.9rem;
-    border: var(--border-medium) solid var(--token-border-strong);
-    border-radius: var(--radius-pill);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-neo-xs);
-    font-family: var(--font-family-display);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-bold);
-    cursor: pointer;
-}
-
-.editor-toolbar__zoom-button--active {
-    background: var(--color-primary);
-}
-
 .editor-stage {
+    width: 100%;
+    max-width: 100%;
     overflow: auto;
     padding: var(--space-2);
     border: 1px solid rgba(31, 22, 51, 0.16);
@@ -215,6 +199,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+    align-items: center;
 }
 
 .editor-controls__swatch {
@@ -232,19 +217,44 @@
     box-shadow: 0 0 0 3px rgba(31, 22, 51, 0.12);
 }
 
-.editor-controls__custom {
-    display: inline-grid;
+.editor-controls__actions {
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--space-2);
-    justify-content: start;
+    align-items: center;
 }
 
-.editor-controls__custom input[type='color'] {
-    width: 4rem;
-    height: 2.75rem;
-    padding: 0.1rem;
+.editor-controls__custom-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: 0.65rem 0.9rem;
     border: var(--border-medium) solid var(--token-border-strong);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     background: var(--color-canvas);
+    box-shadow: var(--shadow-neo-xs);
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+}
+
+.editor-controls__custom-swatch {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--token-border-strong);
+    border-radius: 999px;
+}
+
+.editor-controls__custom-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .editor-page__url {

@@ -14,11 +14,17 @@ import { CanvasApiService } from './canvas-api.service';
 import { ReservationEditorData } from './canvas.models';
 import { UiButtonComponent } from './ui/ui-button.component';
 import { UiCardComponent } from './ui/ui-card.component';
+import { UiSliderComponent } from './ui/ui-slider.component';
 import { UiSpinnerComponent } from './ui/ui-spinner.component';
+
+interface RecentColorEntry {
+    id: number;
+    color: string;
+}
 
 @Component({
     selector: 'app-reservation-editor-page',
-    imports: [FormsModule, RouterLink, UiButtonComponent, UiCardComponent, UiSpinnerComponent],
+    imports: [FormsModule, RouterLink, UiButtonComponent, UiCardComponent, UiSliderComponent, UiSpinnerComponent],
     templateUrl: './reservation-editor-page.component.html',
     styleUrl: './reservation-editor-page.component.scss',
 })
@@ -29,6 +35,9 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.renderCanvas();
     }
 
+    @ViewChild('customColorPicker')
+    private customColorPicker?: ElementRef<HTMLInputElement>;
+
     private readonly route = inject(ActivatedRoute);
     private readonly canvasApi = inject(CanvasApiService);
 
@@ -36,8 +45,9 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly pixels = signal<string[]>([]);
     protected readonly selectedColor = signal('#ff7eb6');
     protected readonly linkUrl = signal('');
-    protected readonly zoom = signal(18);
+    protected readonly zoom = signal(30);
     protected readonly palette = ['#1f1633', '#fffdf8', '#ff7eb6', '#b9b2ff', '#8ed8f8', '#b9f2cf', '#ffd37a'];
+    protected readonly recentColors = signal<RecentColorEntry[]>([]);
     protected readonly isLoading = signal(true);
     protected readonly isSaving = signal(false);
     protected readonly loadError = signal<string | null>(null);
@@ -65,8 +75,11 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     });
 
     private isPainting = false;
+    private hasPendingStrokeSnapshot = false;
     private hasViewInitialized = false;
     private editorCanvas?: ElementRef<HTMLCanvasElement>;
+    private readonly pixelHistory = signal<string[][]>([]);
+    private nextRecentColorId = 1;
 
     public async ngAfterViewInit(): Promise<void> {
         this.hasViewInitialized = true;
@@ -119,16 +132,53 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.renderCanvas();
     }
 
-    protected selectColor(color: string): void {
-        this.selectedColor.set(color);
+    protected selectColor(color: string, remember = true): void {
+        const normalizedColor = this.normalizeColor(color);
+        this.selectedColor.set(normalizedColor);
+        if (remember) {
+            this.rememberRecentColor(normalizedColor);
+        }
+    }
+
+    protected useRecentColor(color: string): void {
+        this.selectColor(color, false);
+    }
+
+    protected openCustomColorPicker(): void {
+        this.customColorPicker?.nativeElement.click();
+    }
+
+    protected applyCustomColor(event: Event): void {
+        const element = event.target as HTMLInputElement | null;
+        if (element?.value) {
+            this.selectColor(element.value);
+        }
     }
 
     protected hasExternalLink(editor: ReservationEditorData): boolean {
         return !!editor.linkUrl;
     }
 
+    protected canUndo(): boolean {
+        return this.pixelHistory().length > 0;
+    }
+
+    protected undoLastStroke(): void {
+        const history = this.pixelHistory();
+        const previousPixels = history.at(-1);
+        if (!previousPixels) {
+            return;
+        }
+
+        this.pixelHistory.set(history.slice(0, -1));
+        this.pixels.set([...previousPixels]);
+        this.renderCanvas();
+        this.saveMessage.set(null);
+    }
+
     protected beginPaint(event: MouseEvent): void {
         this.isPainting = true;
+        this.hasPendingStrokeSnapshot = false;
         this.paintFromEvent(event);
     }
 
@@ -140,6 +190,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
 
     protected endPaint(): void {
         this.isPainting = false;
+        this.hasPendingStrokeSnapshot = false;
     }
 
     private async loadEditor(): Promise<void> {
@@ -155,6 +206,9 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             this.editor.set(editor);
             this.pixels.set([...editor.pixels]);
             this.linkUrl.set(editor.linkUrl ?? '');
+            this.pixelHistory.set([]);
+            this.recentColors.set([]);
+            this.nextRecentColorId = 1;
             this.renderCanvas();
         } catch {
             this.loadError.set('Could not load this reservation editor.');
@@ -179,8 +233,18 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             return;
         }
 
+        if (!this.hasPendingStrokeSnapshot) {
+            this.pushUndoSnapshot();
+            this.hasPendingStrokeSnapshot = true;
+        }
+
+        const pixelIndex = (y * editor.width) + x;
+        if (this.pixels()[pixelIndex] === this.selectedColor()) {
+            return;
+        }
+
         const nextPixels = [...this.pixels()];
-        nextPixels[(y * editor.width) + x] = this.selectedColor();
+        nextPixels[pixelIndex] = this.selectedColor();
         this.pixels.set(nextPixels);
         this.renderCanvas();
     }
@@ -222,5 +286,25 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     private normalizeLinkUrl(value: string): string | null {
         const trimmedValue = value.trim();
         return trimmedValue.length > 0 ? trimmedValue : null;
+    }
+
+    private normalizeColor(color: string): string {
+        return color.trim().toLowerCase();
+    }
+
+    private pushUndoSnapshot(): void {
+        const currentPixels = this.pixels();
+        this.pixelHistory.update(history => [...history.slice(-19), [...currentPixels]]);
+    }
+
+    private rememberRecentColor(color: string): void {
+        this.recentColors.update(currentColors => {
+            const normalizedColor = this.normalizeColor(color);
+            const nextColors = [
+                { id: this.nextRecentColorId++, color: normalizedColor },
+                ...currentColors.filter(existingColor => this.normalizeColor(existingColor.color) !== normalizedColor),
+            ];
+            return nextColors.slice(0, 5);
+        });
     }
 }

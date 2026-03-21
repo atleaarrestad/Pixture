@@ -7,6 +7,7 @@ import { UiCheckboxComponent } from './ui/ui-checkbox.component';
 import { UiComboboxComponent } from './ui/ui-combobox.component';
 import { UiInputComponent } from './ui/ui-input.component';
 import { UiSelectComponent } from './ui/ui-select.component';
+import { UiSliderComponent } from './ui/ui-slider.component';
 import { UiSpinnerComponent } from './ui/ui-spinner.component';
 import { UiTabsComponent } from './ui/ui-tabs.component';
 import { UiTextareaComponent } from './ui/ui-textarea.component';
@@ -25,6 +26,7 @@ import { UiAccordionItem, UiOption, UiTabItem, UiToast, UiTone } from './ui/ui.t
         UiComboboxComponent,
         UiInputComponent,
         UiSelectComponent,
+        UiSliderComponent,
         UiSpinnerComponent,
         UiTabsComponent,
         UiTextareaComponent,
@@ -43,6 +45,7 @@ export class ComponentsPageComponent {
     protected readonly wantsUpdates = signal(true);
     protected readonly selectedIntent = signal('gallery');
     protected readonly selectedComponent = signal('accordion');
+    protected readonly zoomPreview = signal(30);
     protected readonly toasts = signal<UiToast[]>([
         {
             id: 1,

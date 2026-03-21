@@ -71,6 +71,17 @@
                 </ui-tooltip>
             </div>
 
+            <ui-slider
+                label="Zoom slider"
+                hint="A neo-brutalist range control for canvas tools."
+                [value]="zoomPreview()"
+                [min]="1"
+                [max]="50"
+                [step]="1"
+                valueSuffix="x"
+                (valueChange)="zoomPreview.set($event)"
+            />
+
             <div class="button-row">
                 <ui-button variant="secondary" (pressed)="showToast('success')"
                     >Show success toast</ui-button

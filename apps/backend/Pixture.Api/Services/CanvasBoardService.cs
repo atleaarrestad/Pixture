@@ -17,6 +17,7 @@ public interface ICanvasBoardService
 
 public sealed class CanvasBoardService : ICanvasBoardService
 {
+    private const int ReservationGridSize = 10;
     private const int CanvasWidth = 64;
     private const int CanvasHeight = 40;
     private const int PublicRenderScale = 10;
@@ -37,9 +38,9 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 "North launch banner",
                 "Atle",
                 "https://github.com/",
-                4,
-                4,
-                18,
+                0,
+                0,
+                20,
                 10,
                 "#b9b2ff"),
             new ReservationRecord(
@@ -47,22 +48,24 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 "Skyline teaser",
                 "Mia",
                 "https://angular.dev/",
-                28,
-                7,
-                14,
-                14,
+                20,
+                0,
+                20,
+                20,
                 "#8ed8f8"),
             new ReservationRecord(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A003"),
                 "Footer callout",
                 "Noah",
                 "https://dotnet.microsoft.com/",
-                16,
-                24,
-                24,
+                40,
                 10,
+                20,
+                20,
                 "#b9f2cf"),
         ];
+
+        ValidateSeedReservations(reservations);
 
         reservationPixels = reservations.ToDictionary(
             reservation => reservation.Id,
@@ -287,6 +290,68 @@ public sealed class CanvasBoardService : ICanvasBoardService
         }
 
         return parsedUri.ToString();
+    }
+
+    private static void ValidateSeedReservations(IEnumerable<ReservationRecord> seededReservations)
+    {
+        var reservationList = seededReservations.ToArray();
+
+        foreach (var reservation in reservationList)
+        {
+            EnsureReservationFitsGrid(reservation);
+        }
+
+        for (var index = 0; index < reservationList.Length; index++)
+        {
+            for (var compareIndex = index + 1; compareIndex < reservationList.Length; compareIndex++)
+            {
+                if (ReservationsOverlap(reservationList[index], reservationList[compareIndex]))
+                {
+                    throw new InvalidOperationException(
+                        $"Seed reservations '{reservationList[index].Title}' and '{reservationList[compareIndex].Title}' overlap.");
+                }
+            }
+        }
+    }
+
+    private static void EnsureReservationFitsGrid(ReservationRecord reservation)
+    {
+        if (reservation.Width < ReservationGridSize || reservation.Height < ReservationGridSize)
+        {
+            throw new InvalidOperationException(
+                $"Reservation '{reservation.Title}' must be at least {ReservationGridSize}x{ReservationGridSize}.");
+        }
+
+        if (!IsGridAligned(reservation.X)
+            || !IsGridAligned(reservation.Y)
+            || !IsGridAligned(reservation.Width)
+            || !IsGridAligned(reservation.Height))
+        {
+            throw new InvalidOperationException(
+                $"Reservation '{reservation.Title}' must align to the {ReservationGridSize}x{ReservationGridSize} reservation grid.");
+        }
+
+        if (reservation.X < 0
+            || reservation.Y < 0
+            || reservation.X + reservation.Width > CanvasWidth
+            || reservation.Y + reservation.Height > CanvasHeight)
+        {
+            throw new InvalidOperationException(
+                $"Reservation '{reservation.Title}' must fit within the canvas bounds.");
+        }
+    }
+
+    private static bool IsGridAligned(int value)
+    {
+        return value % ReservationGridSize == 0;
+    }
+
+    private static bool ReservationsOverlap(ReservationRecord left, ReservationRecord right)
+    {
+        return left.X < right.X + right.Width
+            && left.X + left.Width > right.X
+            && left.Y < right.Y + right.Height
+            && left.Y + left.Height > right.Y;
     }
 
     private sealed class ReservationRecord(
