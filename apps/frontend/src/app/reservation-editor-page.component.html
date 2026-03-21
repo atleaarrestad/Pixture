@@ -104,7 +104,7 @@
                     <span class="editor-stage-toolbar__meta">{{ toolStatus() }} • Zoom {{ zoom() }}x</span>
                 </div>
 
-                <div class="editor-stage">
+                <div #editorStage class="editor-stage" [style.height.px]="editorStageHeight() ?? null">
                     <div class="editor-stage__viewport">
                         <canvas
                             #editorCanvas

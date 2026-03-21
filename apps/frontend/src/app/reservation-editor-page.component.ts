@@ -4,6 +4,7 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
+    HostListener,
     ViewChild,
     computed,
     inject,
@@ -56,6 +57,13 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     @ViewChild('imageUploadInput')
     private imageUploadInput?: ElementRef<HTMLInputElement>;
 
+    @ViewChild('editorStage')
+    private set editorStageRef(value: ElementRef<HTMLDivElement> | undefined) {
+        this.editorStage = value;
+        this.scheduleStageLayout();
+        this.scheduleRecommendedZoom();
+    }
+
     @ViewChild('importPreviewCanvas')
     private set importPreviewCanvasRef(value: ElementRef<HTMLCanvasElement> | undefined) {
         this.importPreviewCanvas = value;
@@ -73,6 +81,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     protected readonly selectedTool = signal<DrawTool>('brush');
     protected readonly palette = ['#1f1633', '#fffdf8', '#ff7eb6', '#b9b2ff', '#8ed8f8', '#b9f2cf', '#ffd37a'];
     protected readonly recentColors = signal<RecentColorEntry[]>([]);
+    protected readonly editorStageHeight = signal<number | null>(null);
     protected readonly isLoading = signal(true);
     protected readonly isSaving = signal(false);
     protected readonly isImporting = signal(false);
@@ -145,8 +154,10 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     private hasPendingStrokeSnapshot = false;
     private hasViewInitialized = false;
     private editorCanvas?: ElementRef<HTMLCanvasElement>;
+    private editorStage?: ElementRef<HTMLDivElement>;
     private importPreviewCanvas?: ElementRef<HTMLCanvasElement>;
     private stagedImportImage: HTMLImageElement | null = null;
+    private hasAppliedRecommendedZoom = false;
     private importDragState:
         | {
             startClientX: number;
@@ -168,6 +179,11 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     public async ngAfterViewInit(): Promise<void> {
         this.hasViewInitialized = true;
         await this.loadEditor();
+    }
+
+    @HostListener('window:resize')
+    protected onWindowResize(): void {
+        this.scheduleStageLayout();
     }
 
     protected async save(): Promise<void> {
@@ -471,6 +487,9 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             this.pixelHistory.set([]);
             this.recentColors.set([]);
             this.nextRecentColorId = 1;
+            this.hasAppliedRecommendedZoom = false;
+            this.scheduleStageLayout();
+            this.scheduleRecommendedZoom();
             this.renderCanvas();
         } catch {
             this.loadError.set('Could not load this reservation editor.');
@@ -984,6 +1003,64 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         }
 
         return 'Could not import that image right now.';
+    }
+
+    private scheduleRecommendedZoom(): void {
+        if (this.hasAppliedRecommendedZoom) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            this.applyRecommendedZoom();
+        });
+    }
+
+    private scheduleStageLayout(): void {
+        requestAnimationFrame(() => {
+            this.applyStageLayout();
+        });
+    }
+
+    private applyStageLayout(): void {
+        const stage = this.editorStage?.nativeElement;
+        if (!stage) {
+            return;
+        }
+
+        if (window.innerWidth <= 900) {
+            this.editorStageHeight.set(null);
+            return;
+        }
+
+        const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+        const availableHeight = Math.floor(viewportHeight - stage.getBoundingClientRect().top - 24);
+        this.editorStageHeight.set(this.clamp(availableHeight, 240, 640));
+    }
+
+    private applyRecommendedZoom(): void {
+        const editor = this.editor();
+        const stage = this.editorStage?.nativeElement;
+        if (!editor || !stage || this.hasAppliedRecommendedZoom) {
+            return;
+        }
+
+        const stageRect = stage.getBoundingClientRect();
+        if (stageRect.width <= 0 || stageRect.height <= 0) {
+            return;
+        }
+
+        const stageStyles = window.getComputedStyle(stage);
+        const horizontalPadding = Number.parseFloat(stageStyles.paddingLeft) + Number.parseFloat(stageStyles.paddingRight);
+        const verticalPadding = Number.parseFloat(stageStyles.paddingTop) + Number.parseFloat(stageStyles.paddingBottom);
+        const availableWidth = Math.max(stageRect.width - horizontalPadding - 8, 1);
+        const availableHeight = Math.max(stageRect.height - verticalPadding - 8, 1);
+        const widthZoom = Math.floor(availableWidth / editor.width);
+        const heightZoom = Math.floor(availableHeight / editor.height);
+        const recommendedZoom = this.clamp(Math.min(widthZoom, heightZoom), 1, 50);
+
+        this.zoom.set(recommendedZoom);
+        this.hasAppliedRecommendedZoom = true;
+        this.renderCanvas();
     }
 
     private renderLinePreview(
