@@ -109,7 +109,7 @@
 
 .editor-page__canvas-card {
     position: sticky;
-    top: var(--space-4);
+    top: calc(5.5rem + var(--space-4));
 }
 
 .editor-page__sidebar {
