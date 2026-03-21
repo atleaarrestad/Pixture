@@ -88,6 +88,11 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     });
     protected readonly toolStatus = computed(() => {
         const lineStart = this.lineStart();
+        const linePreviewEnd = this.linePreviewEnd();
+        if (this.selectedTool() === 'line' && lineStart && linePreviewEnd) {
+            return `Line ${lineStart.x}, ${lineStart.y} → ${linePreviewEnd.x}, ${linePreviewEnd.y}`;
+        }
+
         if (this.selectedTool() === 'line' && lineStart) {
             return `Line start ${lineStart.x}, ${lineStart.y}`;
         }
@@ -108,6 +113,7 @@ export class ReservationEditorPageComponent implements AfterViewInit {
     private editorCanvas?: ElementRef<HTMLCanvasElement>;
     private readonly pixelHistory = signal<string[][]>([]);
     private readonly lineStart = signal<{ x: number; y: number } | null>(null);
+    private readonly linePreviewEnd = signal<{ x: number; y: number } | null>(null);
     private nextRecentColorId = 1;
     protected readonly brushIcon = faBrush;
     protected readonly bucketIcon = faFillDrip;
@@ -169,7 +175,10 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.selectedTool.set(tool);
         if (tool !== 'line') {
             this.lineStart.set(null);
+            this.linePreviewEnd.set(null);
+            this.isPainting = false;
         }
+        this.renderCanvas();
     }
 
     protected selectColor(color: string, remember = true): void {
@@ -227,7 +236,10 @@ export class ReservationEditorPageComponent implements AfterViewInit {
                 this.applyBucketFill(point.x, point.y);
                 break;
             case 'line':
-                this.applyLineTool(point.x, point.y);
+                this.isPainting = true;
+                this.lineStart.set(point);
+                this.linePreviewEnd.set(point);
+                this.renderCanvas();
                 break;
             default:
                 this.isPainting = true;
@@ -243,10 +255,22 @@ export class ReservationEditorPageComponent implements AfterViewInit {
             if (point) {
                 this.applyBrush(point.x, point.y);
             }
+            return;
+        }
+
+        if (this.selectedTool() === 'line' && this.isPainting) {
+            const point = this.resolveCanvasPoint(event);
+            if (point) {
+                this.linePreviewEnd.set(point);
+                this.renderCanvas();
+            }
         }
     }
 
     protected endPaint(): void {
+        if (this.selectedTool() === 'line' && this.isPainting) {
+            this.commitLinePreview();
+        }
         this.isPainting = false;
         this.hasPendingStrokeSnapshot = false;
     }
@@ -373,19 +397,22 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         this.saveMessage.set(null);
     }
 
-    private applyLineTool(x: number, y: number): void {
+    private commitLinePreview(): void {
         const editor = this.editor();
         if (!editor) {
             return;
         }
 
         const start = this.lineStart();
-        if (!start) {
-            this.lineStart.set({ x, y });
+        const end = this.linePreviewEnd();
+        if (!start || !end) {
+            this.lineStart.set(null);
+            this.linePreviewEnd.set(null);
+            this.renderCanvas();
             return;
         }
 
-        const linePoints = this.getLinePoints(start.x, start.y, x, y);
+        const linePoints = this.getLinePoints(start.x, start.y, end.x, end.y);
         const nextPixels = [...this.pixels()];
         let changed = false;
 
@@ -398,8 +425,10 @@ export class ReservationEditorPageComponent implements AfterViewInit {
         }
 
         this.lineStart.set(null);
+        this.linePreviewEnd.set(null);
 
         if (!changed) {
+            this.renderCanvas();
             return;
         }
 
@@ -441,6 +470,8 @@ export class ReservationEditorPageComponent implements AfterViewInit {
                 }
             }
         }
+
+        this.renderLinePreview(context, editor.width, editor.height, zoom);
     }
 
     private normalizeLinkUrl(value: string): string | null {
@@ -493,6 +524,42 @@ export class ReservationEditorPageComponent implements AfterViewInit {
                 error += deltaX;
                 currentY += stepY;
             }
+        }
+    }
+
+    private renderLinePreview(
+        context: CanvasRenderingContext2D,
+        editorWidth: number,
+        editorHeight: number,
+        zoom: number,
+    ): void {
+        if (this.selectedTool() !== 'line' || !this.isPainting) {
+            return;
+        }
+
+        const start = this.lineStart();
+        const end = this.linePreviewEnd();
+        if (!start || !end) {
+            return;
+        }
+
+        const previewPoints = this.getLinePoints(start.x, start.y, end.x, end.y);
+        for (const point of previewPoints) {
+            if (point.x < 0 || point.x >= editorWidth || point.y < 0 || point.y >= editorHeight) {
+                continue;
+            }
+
+            context.save();
+            context.fillStyle = this.selectedColor();
+            context.globalAlpha = 0.55;
+            context.fillRect(point.x * zoom, point.y * zoom, zoom, zoom);
+
+            if (zoom >= 12) {
+                context.strokeStyle = 'rgba(31, 22, 51, 0.35)';
+                context.lineWidth = 1;
+                context.strokeRect((point.x * zoom) + 0.5, (point.y * zoom) + 0.5, zoom - 1, zoom - 1);
+            }
+            context.restore();
         }
     }
 }
