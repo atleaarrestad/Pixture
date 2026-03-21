@@ -1,0 +1,12 @@
+{
+  "name": "pixture",
+  "private": true,
+  "packageManager": "npm@10.9.3",
+  "scripts": {
+    "frontend:start": "npm run start --prefix apps/frontend",
+    "frontend:build": "npm run build --prefix apps/frontend",
+    "frontend:test": "npm run test --prefix apps/frontend -- --watch=false",
+    "backend:build": "dotnet build apps/backend/Pixture.Api/Pixture.Api.csproj",
+    "backend:run": "dotnet run --project apps/backend/Pixture.Api"
+  }
+}

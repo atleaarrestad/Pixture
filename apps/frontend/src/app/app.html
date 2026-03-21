@@ -1,0 +1,39 @@
+<main class="shell">
+  <section class="hero">
+    <p class="eyebrow">Angular + ASP.NET Core monorepo starter</p>
+    <h1>{{ title() }}</h1>
+    <p class="lead">
+      A clean starting point with an Angular frontend in <code>apps/frontend</code>
+      and a .NET Web API in <code>apps/backend/Pixture.Api</code>.
+    </p>
+  </section>
+
+  <section class="cards">
+    <article class="card">
+      <h2>Frontend</h2>
+      <p>
+        The Angular app is scaffolded with routing, SCSS, and the latest supported
+        CLI version available during setup.
+      </p>
+      <code>npm run start --prefix apps/frontend</code>
+    </article>
+
+    <article class="card">
+      <h2>Backend</h2>
+      <p>
+        The API uses ASP.NET Core controllers, OpenAPI in development, and a simple
+        health endpoint.
+      </p>
+      <code>dotnet run --project apps/backend/Pixture.Api</code>
+    </article>
+
+    <article class="card">
+      <h2>First API endpoint</h2>
+      <p>Start the API and check the starter endpoints:</p>
+      <ul>
+        <li><code>{{ backendUrl() }}/health</code></li>
+        <li><code>{{ backendUrl() }}/api/system/info</code></li>
+      </ul>
+    </article>
+  </section>
+</main>
