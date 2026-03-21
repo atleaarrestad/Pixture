@@ -32,6 +32,7 @@ import { Component, input } from '@angular/core';
             .ui-card {
                 display: grid;
                 gap: var(--space-4);
+                min-width: 0;
                 padding: var(--space-6);
                 border: var(--border-medium) solid var(--token-border-strong);
                 border-radius: var(--radius-xl);
@@ -52,6 +53,10 @@ import { Component, input } from '@angular/core';
             .ui-card__header {
                 display: grid;
                 gap: var(--space-2);
+            }
+
+            .ui-card__body {
+                min-width: 0;
             }
 
             .ui-card__eyebrow {

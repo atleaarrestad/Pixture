@@ -18,9 +18,9 @@ public interface ICanvasBoardService
 public sealed class CanvasBoardService : ICanvasBoardService
 {
     private const int ReservationGridSize = 10;
-    private const int CanvasWidth = 64;
-    private const int CanvasHeight = 40;
-    private const int PublicRenderScale = 10;
+    private const int CanvasWidth = 200;
+    private const int CanvasHeight = 200;
+    private const int PublicRenderScale = 5;
 
     private readonly object syncRoot = new();
     private readonly List<ReservationRecord> reservations;
@@ -40,28 +40,28 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 "https://github.com/",
                 0,
                 0,
-                20,
-                10,
+                50,
+                50,
                 "#b9b2ff"),
             new ReservationRecord(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A002"),
                 "Skyline teaser",
                 "Mia",
                 "https://angular.dev/",
-                20,
-                0,
-                20,
-                20,
+                50,
+                50,
+                30,
+                10,
                 "#8ed8f8"),
             new ReservationRecord(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A003"),
                 "Footer callout",
                 "Noah",
                 "https://dotnet.microsoft.com/",
-                40,
-                10,
-                20,
-                20,
+                70,
+                70,
+                100,
+                100,
                 "#b9f2cf"),
         ];
 

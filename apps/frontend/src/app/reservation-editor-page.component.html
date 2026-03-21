@@ -105,14 +105,16 @@
                 </div>
 
                 <div class="editor-stage">
-                    <canvas
-                        #editorCanvas
-                        class="editor-stage__canvas"
-                        (mousedown)="beginPaint($event)"
-                        (mousemove)="paintWhileDragging($event)"
-                        (mouseup)="endPaint()"
-                        (mouseleave)="endPaint()"
-                    ></canvas>
+                    <div class="editor-stage__viewport">
+                        <canvas
+                            #editorCanvas
+                            class="editor-stage__canvas"
+                            (mousedown)="beginPaint($event)"
+                            (mousemove)="paintWhileDragging($event)"
+                            (mouseup)="endPaint()"
+                            (mouseleave)="endPaint()"
+                        ></canvas>
+                    </div>
                 </div>
             </ui-card>
 
