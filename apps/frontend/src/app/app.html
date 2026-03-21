@@ -136,6 +136,28 @@
 
     <section class="section-grid section-grid--stacked">
         <ui-card
+            class="section-grid__full"
+            eyebrow="Loading"
+            title="Spinner lab"
+            subtitle="Ten different neobrutalist loading ideas built from the same shared spinner component."
+            tone="tertiary"
+        >
+            <div class="spinner-lab">
+                @for (spinner of spinnerOptions; track spinner.variant) {
+                    <article class="spinner-option">
+                        <ui-spinner size="lg" [variant]="spinner.variant" />
+                        <div class="spinner-option__copy">
+                            <h3>{{ spinner.label }}</h3>
+                            <p>{{ spinner.description }}</p>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ui-card>
+    </section>
+
+    <section class="section-grid section-grid--stacked">
+        <ui-card
             eyebrow="Disclosure"
             title="Accordion"
             subtitle="Useful for FAQ sections, sidebars, and expandable detail panels."
