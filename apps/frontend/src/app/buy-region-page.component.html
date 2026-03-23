@@ -1,0 +1,152 @@
+<main class="buy-region-page">
+    @if (isLoading()) {
+        <section class="buy-region-page__loading">
+            <ui-spinner label="Loading board availability" size="lg" />
+        </section>
+    } @else if (loadError()) {
+        <section class="buy-region-page__error">
+            <ui-card
+                title="Buy Region unavailable"
+                subtitle="{{ loadError() }}"
+                tone="tertiary"
+            ></ui-card>
+        </section>
+    } @else if (canvas(); as canvas) {
+        <section class="buy-region-page__layout">
+            <section class="buy-region-page__board-panel" aria-labelledby="buy-region-title">
+                <div class="buy-region-page__header">
+                    <div class="buy-region-page__copy">
+                        <h1 id="buy-region-title">Buy Region</h1>
+                        <p>
+                            Drag to reserve a new rectangular space. Selections snap to the 10x10
+                            chunk grid and can be up to 100x100 pixels.
+                        </p>
+                    </div>
+
+                    <div
+                        class="buy-region-page__status"
+                        [class.buy-region-page__status--valid]="selectionPreview()?.isValid"
+                        [class.buy-region-page__status--invalid]="selectionPreview() && !selectionPreview()?.isValid"
+                        aria-live="polite"
+                    >
+                        {{ selectionStatus() }}
+                    </div>
+                </div>
+
+                <div
+                    #boardStage
+                    class="buy-region-board"
+                    [style.aspect-ratio]="canvas.width + ' / ' + canvas.height"
+                    [style.--board-width]="canvas.width"
+                    [style.--board-height]="canvas.height"
+                    [style.--grid-columns]="canvas.width / gridSize"
+                    [style.--grid-rows]="canvas.height / gridSize"
+                    aria-label="Canvas availability board"
+                    (mousedown)="beginSelection($event)"
+                >
+                    <img
+                        class="buy-region-board__image"
+                        [src]="imageUrl()"
+                        [alt]="'Pixture board render ' + canvas.renderVersion"
+                        draggable="false"
+                    />
+
+                    <div class="buy-region-board__grid" aria-hidden="true"></div>
+
+                    <div class="buy-region-board__overlay-layer" aria-hidden="true">
+                        @for (reservation of reservations(); track reservation.reservationId) {
+                            <div
+                                class="buy-region-board__reservation"
+                                [style.left.%]="rectangleLeft(reservation)"
+                                [style.top.%]="rectangleTop(reservation)"
+                                [style.width.%]="rectangleWidth(reservation)"
+                                [style.height.%]="rectangleHeight(reservation)"
+                                [style.--reservation-accent]="reservation.accentColor"
+                            >
+                                <span>{{ reservation.title }}</span>
+                            </div>
+                        }
+
+                        @if (selectionPreview(); as selection) {
+                            <div
+                                class="buy-region-board__selection"
+                                [class.buy-region-board__selection--invalid]="!selection.isValid"
+                                [style.left.%]="rectangleLeft(selection)"
+                                [style.top.%]="rectangleTop(selection)"
+                                [style.width.%]="rectangleWidth(selection)"
+                                [style.height.%]="rectangleHeight(selection)"
+                            >
+                                <span>
+                                    {{ selection.widthInChunks }} x {{ selection.heightInChunks }} chunks
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <p class="buy-region-page__hint">
+                    Reserved regions stay visible but dimmed. Release the mouse on a valid selection
+                    to open a summary popup.
+                </p>
+            </section>
+
+            <aside class="buy-region-page__sidebar">
+                <ui-card
+                    eyebrow="Rules"
+                    title="Reservation guardrails"
+                    subtitle="Selections stay rectangular and snap to the same grid the backend already uses."
+                >
+                    <ul class="buy-region-page__rule-list">
+                        <li>Every reservation snaps to 10x10 chunks.</li>
+                        <li>Selections must stay one connected rectangle.</li>
+                        <li>Reserved regions cannot be overlapped.</li>
+                        <li>The maximum selectable size is 100x100 pixels.</li>
+                    </ul>
+                </ui-card>
+
+                <ui-card
+                    eyebrow="Selection"
+                    title="Current selection"
+                    subtitle="Use this summary to confirm the area before payment is added later."
+                    tone="accent"
+                >
+                    @if (selectionPreview(); as selection) {
+                        <dl class="buy-region-page__metrics">
+                            <div class="buy-region-page__metric">
+                                <dt>Origin</dt>
+                                <dd>{{ selection.x }}, {{ selection.y }}</dd>
+                            </div>
+                            <div class="buy-region-page__metric">
+                                <dt>Pixels</dt>
+                                <dd>{{ selection.width }} x {{ selection.height }}</dd>
+                            </div>
+                            <div class="buy-region-page__metric">
+                                <dt>Chunks</dt>
+                                <dd>{{ selection.widthInChunks }} x {{ selection.heightInChunks }}</dd>
+                            </div>
+                            <div class="buy-region-page__metric">
+                                <dt>Total chunks</dt>
+                                <dd>{{ selection.chunkCount }}</dd>
+                            </div>
+                        </dl>
+
+                        <p
+                            class="buy-region-page__selection-note"
+                            [class.buy-region-page__selection-note--invalid]="!selection.isValid"
+                        >
+                            @if (selection.isValid) {
+                                This region is available and ready for the future payment flow.
+                            } @else {
+                                {{ selection.reason }}
+                            }
+                        </p>
+                    } @else {
+                        <p class="buy-region-page__empty-state">
+                            No region selected yet. Click and drag on the board to pick one.
+                        </p>
+                    }
+                </ui-card>
+            </aside>
+        </section>
+    }
+</main>

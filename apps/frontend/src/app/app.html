@@ -13,6 +13,13 @@
                     Home
                 </a>
                 <a
+                    routerLink="/buy-region"
+                    routerLinkActive="topbar__link--active"
+                    class="topbar__link"
+                >
+                    Buy Region
+                </a>
+                <a
                     routerLink="/components"
                     routerLinkActive="topbar__link--active"
                     class="topbar__link"
@@ -88,6 +95,30 @@
                         } @else {
                             <p class="app-dialog__muted">No public link available</p>
                         }
+                    </div>
+                } @else if (dialog.kind === 'buy-region-summary') {
+                    <div class="app-dialog__content">
+                        <h2 id="app-dialog-title">Region selected</h2>
+                        <p class="app-dialog__subtitle">
+                            This rectangle is available and ready for the future checkout flow.
+                        </p>
+                        <p>
+                            For now we only show a summary. Payment options will plug into this
+                            selection later.
+                        </p>
+                        <p>
+                            <strong>Origin:</strong> {{ dialog.selection.x }},
+                            {{ dialog.selection.y }}
+                        </p>
+                        <p>
+                            <strong>Pixels:</strong> {{ dialog.selection.width }} x
+                            {{ dialog.selection.height }}
+                        </p>
+                        <p>
+                            <strong>Chunks:</strong> {{ dialog.selection.widthInChunks }} x
+                            {{ dialog.selection.heightInChunks }}
+                        </p>
+                        <p><strong>Total chunks:</strong> {{ dialog.selection.chunkCount }}</p>
                     </div>
                 }
             </section>

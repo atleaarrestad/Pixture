@@ -24,7 +24,8 @@ describe('App', () => {
         fixture.detectChanges();
         const compiled = fixture.nativeElement as HTMLElement;
         expect(compiled.querySelector('.topbar__brand')?.textContent).toContain('Pixture');
-        expect(compiled.querySelectorAll('.topbar__link').length).toBe(2);
+        expect(compiled.querySelectorAll('.topbar__link').length).toBe(3);
+        expect(compiled.textContent).toContain('Buy Region');
     });
 
     it('should render and close the reservation dialog', async () => {

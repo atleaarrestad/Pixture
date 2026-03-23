@@ -1,0 +1,239 @@
+.buy-region-page {
+    width: min(var(--container-page), calc(100% - 2rem));
+    margin: 0 auto;
+    padding: var(--space-4) 0 var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+}
+
+.buy-region-page__loading,
+.buy-region-page__error {
+    min-height: 55vh;
+    display: grid;
+    place-items: center;
+}
+
+.buy-region-page__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.95fr);
+    gap: var(--space-4);
+    align-items: start;
+}
+
+.buy-region-page__board-panel,
+.buy-region-page__sidebar {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.buy-region-page__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.buy-region-page__copy {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.buy-region-page__copy h1,
+.buy-region-page__copy p {
+    margin: 0;
+}
+
+.buy-region-page__copy h1 {
+    font-family: var(--font-family-display);
+    font-size: clamp(1.5rem, 2vw, 1.95rem);
+    line-height: 1.1;
+}
+
+.buy-region-page__copy p,
+.buy-region-page__hint,
+.buy-region-page__selection-note,
+.buy-region-page__empty-state {
+    color: var(--token-text-secondary);
+}
+
+.buy-region-page__status {
+    min-width: min(22rem, 100%);
+    padding: 0.85rem 1rem;
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-neo-xs);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+}
+
+.buy-region-page__status--valid {
+    background: color-mix(in srgb, var(--color-tertiary) 20%, white);
+}
+
+.buy-region-page__status--invalid {
+    background: color-mix(in srgb, var(--color-accent) 18%, white);
+}
+
+.buy-region-board {
+    position: relative;
+    width: min(100%, calc((100dvh - 15rem) * (var(--board-width) / var(--board-height))));
+    margin: 0 auto;
+    border: var(--border-medium) solid var(--token-border-strong);
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-neo-md);
+    overflow: hidden;
+    cursor: crosshair;
+    user-select: none;
+}
+
+.buy-region-board__image,
+.buy-region-board__grid,
+.buy-region-board__overlay-layer {
+    position: absolute;
+    inset: 0;
+}
+
+.buy-region-board__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+}
+
+.buy-region-board__grid {
+    background-image:
+        linear-gradient(to right, rgba(31, 22, 51, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(31, 22, 51, 0.12) 1px, transparent 1px);
+    background-size:
+        calc(100% / var(--grid-columns)) calc(100% / var(--grid-rows)),
+        calc(100% / var(--grid-columns)) calc(100% / var(--grid-rows));
+}
+
+.buy-region-board__overlay-layer {
+    pointer-events: none;
+}
+
+.buy-region-board__reservation,
+.buy-region-board__selection {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0.2rem;
+}
+
+.buy-region-board__reservation {
+    --reservation-accent: var(--color-primary);
+    border: 2px solid color-mix(in srgb, var(--reservation-accent) 70%, var(--token-border-strong));
+    background: color-mix(in srgb, var(--reservation-accent) 26%, rgba(255, 255, 255, 0.7));
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+    opacity: 0.72;
+}
+
+.buy-region-board__reservation span,
+.buy-region-board__selection span {
+    display: inline-flex;
+    max-width: 100%;
+    padding: 0.1rem 0.45rem;
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-neo-xs);
+    font-family: var(--font-family-display);
+    font-size: 0.64rem;
+    font-weight: var(--font-weight-bold);
+    line-height: 1;
+}
+
+.buy-region-board__selection {
+    border: 3px dashed rgba(31, 22, 51, 0.8);
+    background: rgba(185, 242, 207, 0.32);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+}
+
+.buy-region-board__selection--invalid {
+    border-color: rgba(255, 126, 182, 0.92);
+    background: rgba(255, 126, 182, 0.26);
+}
+
+.buy-region-page__hint,
+.buy-region-page__selection-note,
+.buy-region-page__empty-state {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.buy-region-page__rule-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: var(--space-2);
+    color: var(--token-text-secondary);
+}
+
+.buy-region-page__metrics {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.buy-region-page__metric {
+    padding: var(--space-3);
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-neo-xs);
+}
+
+.buy-region-page__metric dt {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--token-text-secondary);
+}
+
+.buy-region-page__metric dd {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--token-text-primary);
+}
+
+.buy-region-page__selection-note--invalid {
+    color: var(--color-accent);
+}
+
+@media (max-width: 1080px) {
+    .buy-region-page__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 960px) {
+    .buy-region-page {
+        width: min(var(--container-page), calc(100% - 1rem));
+    }
+
+    .buy-region-page__header {
+        flex-direction: column;
+    }
+
+    .buy-region-page__status {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .buy-region-board {
+        width: 100%;
+    }
+
+    .buy-region-page__metrics {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
