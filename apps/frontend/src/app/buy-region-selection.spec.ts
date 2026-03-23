@@ -42,12 +42,22 @@ describe('buy-region-selection', () => {
 
     it('rejects selections larger than the 100x100 pixel limit', () => {
         const selection = validateSelection(
-            buildSelectionFromCells({ column: 0, row: 0 }, { column: 10, row: 10 }),
+            buildSelectionFromCells({ column: 0, row: 0 }, { column: 24, row: 20 }),
             reservations,
         );
 
         expect(selection.isValid).toBe(false);
-        expect(selection.reason).toContain('100x100');
+        expect(selection.reason).toContain('50,000');
+    });
+
+    it('allows large selections that stay within the 50,000 pixel pricing cap', () => {
+        const selection = validateSelection(
+            buildSelectionFromCells({ column: 0, row: 0 }, { column: 19, row: 19 }),
+            [],
+        );
+
+        expect(selection.isValid).toBe(true);
+        expect(selection.width * selection.height).toBe(40_000);
     });
 
     it('allows selections that only touch a reserved region edge', () => {

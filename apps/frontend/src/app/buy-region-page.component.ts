@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, ViewChild, computed, inject, signa
 import { firstValueFrom } from 'rxjs';
 import { CanvasApiService } from './canvas-api.service';
 import {
-    MAX_RESERVATION_SIZE,
+    MAX_RESERVATION_PIXELS,
     type GridCell,
     type SelectionValidation,
     RESERVATION_GRID_SIZE,
@@ -33,7 +33,11 @@ export class BuyRegionPageComponent {
     protected readonly isLoading = signal(true);
     protected readonly loadError = signal<string | null>(null);
     protected readonly gridSize = RESERVATION_GRID_SIZE;
-    protected readonly maxReservationSize = MAX_RESERVATION_SIZE;
+    protected readonly maxReservationPixels = MAX_RESERVATION_PIXELS;
+    protected readonly practicalPixelCap = computed(() => {
+        const canvas = this.canvas();
+        return canvas ? Math.min(canvas.width * canvas.height, this.maxReservationPixels) : this.maxReservationPixels;
+    });
     protected readonly imageUrl = computed(() => {
         const canvas = this.canvas();
         return canvas ? this.canvasApi.toAbsoluteUrl(canvas.imageUrl) : '';
@@ -45,7 +49,7 @@ export class BuyRegionPageComponent {
         }
 
         return selection.isValid
-            ? `Ready to reserve ${selection.width}x${selection.height} pixels (${selection.chunkCount} chunks). Release to review it.`
+            ? `Ready to reserve ${selection.width}x${selection.height} pixels (${(selection.width * selection.height).toLocaleString()} dollars, ${selection.chunkCount} chunks). Release to review it.`
             : selection.reason ?? 'This selection is not available.';
     });
 

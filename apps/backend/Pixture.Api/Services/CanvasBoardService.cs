@@ -8,8 +8,8 @@ namespace Pixture.Api.Services;
 public sealed class CanvasBoardService : ICanvasBoardService
 {
     private const int ReservationGridSize = 10;
-    private const int CanvasWidth = 200;
-    private const int CanvasHeight = 200;
+    private const int CanvasWidth = 1000;
+    private const int CanvasHeight = 1000;
     private const int PublicRenderScale = 5;
 
     private readonly object syncRoot = new();

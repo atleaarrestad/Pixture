@@ -21,7 +21,7 @@ export interface SelectionValidation extends GridSelection {
 }
 
 export const RESERVATION_GRID_SIZE = 10;
-export const MAX_RESERVATION_SIZE = 100;
+export const MAX_RESERVATION_PIXELS = 50_000;
 
 export function buildSelectionFromCells(
     anchor: GridCell,
@@ -47,13 +47,14 @@ export function buildSelectionFromCells(
 export function validateSelection(
     selection: GridSelection,
     reservations: Pick<CanvasReservation, 'x' | 'y' | 'width' | 'height'>[],
-    maxReservationSize = MAX_RESERVATION_SIZE,
+    maxReservationPixels = MAX_RESERVATION_PIXELS,
 ): SelectionValidation {
-    if (selection.width > maxReservationSize || selection.height > maxReservationSize) {
+    const pixelCount = selection.width * selection.height;
+    if (pixelCount > maxReservationPixels) {
         return {
             ...selection,
             isValid: false,
-            reason: `Selection can be at most ${maxReservationSize}x${maxReservationSize} pixels.`,
+            reason: `Selection can be at most ${maxReservationPixels.toLocaleString()} pixels total.`,
         };
     }
 

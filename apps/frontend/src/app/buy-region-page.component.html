@@ -19,7 +19,8 @@
                         <h1 id="buy-region-title">Buy Region</h1>
                         <p>
                             Drag to reserve a new rectangular space. Selections snap to the 10x10
-                            chunk grid and can be up to 100x100 pixels.
+                            chunk grid. Pricing is $1 per pixel, with a cap of
+                            {{ maxReservationPixels.toLocaleString() }} pixels total.
                         </p>
                     </div>
 
@@ -100,7 +101,8 @@
                         <li>Every reservation snaps to 10x10 chunks.</li>
                         <li>Selections must stay one connected rectangle.</li>
                         <li>Reserved regions cannot be overlapped.</li>
-                        <li>The maximum selectable size is 100x100 pixels.</li>
+                        <li>The pricing cap is {{ maxReservationPixels.toLocaleString() }} pixels total.</li>
+                        <li>On the current board, that works out to a practical max of {{ practicalPixelCap().toLocaleString() }} pixels.</li>
                     </ul>
                 </ui-card>
 
@@ -127,6 +129,10 @@
                             <div class="buy-region-page__metric">
                                 <dt>Total chunks</dt>
                                 <dd>{{ selection.chunkCount }}</dd>
+                            </div>
+                            <div class="buy-region-page__metric">
+                                <dt>Total price</dt>
+                                <dd>${{ (selection.width * selection.height).toLocaleString() }}</dd>
                             </div>
                         </dl>
 
