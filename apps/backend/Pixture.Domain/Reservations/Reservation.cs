@@ -7,6 +7,8 @@ public sealed class Reservation
         string title,
         string ownerDisplayName,
         string? linkUrl,
+        string? linkDisplayName,
+        string? linkLogoUrl,
         int x,
         int y,
         int width,
@@ -17,6 +19,8 @@ public sealed class Reservation
         Title = title;
         OwnerDisplayName = ownerDisplayName;
         LinkUrl = linkUrl;
+        LinkDisplayName = linkDisplayName;
+        LinkLogoUrl = linkLogoUrl;
         X = x;
         Y = y;
         Width = width;
@@ -28,6 +32,8 @@ public sealed class Reservation
     public string Title { get; }
     public string OwnerDisplayName { get; }
     public string? LinkUrl { get; private set; }
+    public string? LinkDisplayName { get; }
+    public string? LinkLogoUrl { get; }
     public int X { get; }
     public int Y { get; }
     public int Width { get; }

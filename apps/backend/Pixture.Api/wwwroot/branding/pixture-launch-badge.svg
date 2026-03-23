@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Temporary Pixture launch badge</title>
+  <desc id="desc">A temporary 128 by 128 promotional logo for seeded reservation data.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b9b2ff" />
+      <stop offset="100%" stop-color="#8ed8f8" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)" />
+  <circle cx="64" cy="64" r="28" fill="#fffaf1" />
+  <path d="M39 78V50h17.5c8.5 0 14.5 5.4 14.5 13.1S65 76.3 56.5 76.3H48V78H39Zm9-9.3h7.4c3.8 0 6.2-2.2 6.2-5.6s-2.4-5.5-6.2-5.5H48v11.1Z" fill="#1f1633" />
+  <path d="M73 48h16v8H81v24h-8V48Z" fill="#1f1633" />
+</svg>

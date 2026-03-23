@@ -22,6 +22,8 @@ describe('HomePageComponent', () => {
             title: 'Pixel Garden',
             ownerDisplayName: 'Pixture Team',
             linkUrl: 'https://example.com/pixel-garden',
+            linkDisplayName: 'Pixel Garden Studio',
+            linkLogoUrl: 'https://cdn.example.com/pixel-garden-logo.svg',
             x: 10,
             y: 12,
             width: 20,

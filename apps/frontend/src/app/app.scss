@@ -168,6 +168,25 @@
     font-weight: var(--font-weight-bold);
 }
 
+.app-dialog__link-logo-shell {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem;
+    border: var(--border-medium) solid var(--token-border-strong);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--shadow-neo-xs);
+}
+
+.app-dialog__link-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .app-dialog__link-copy {
     min-width: 0;
     display: grid;

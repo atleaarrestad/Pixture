@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pixture.Api.Infrastructure;
 using Pixture.Api.Models;
 using Pixture.Api.Services;
 
@@ -12,7 +13,7 @@ public sealed class CanvasController(ICanvasBoardService canvasBoardService) : C
     public ActionResult<CanvasSummaryResponse> GetCanvas()
     {
         var summary = canvasBoardService.GetCanvasSummary();
-        var imageUrl = $"{Request.Scheme}://{Request.Host}/api/canvas/image?version={summary.RenderVersion}";
+        var imageUrl = Request.ToAbsoluteUrl($"/api/canvas/image?version={summary.RenderVersion}");
 
         return Ok(new CanvasSummaryResponse(
             summary.Width,
@@ -32,6 +33,8 @@ public sealed class CanvasController(ICanvasBoardService canvasBoardService) : C
                 reservation.Title,
                 reservation.OwnerDisplayName,
                 reservation.LinkUrl,
+                reservation.LinkDisplayName,
+                Request.ToAbsoluteUrlOrNull(reservation.LinkLogoUrl),
                 reservation.X,
                 reservation.Y,
                 reservation.Width,

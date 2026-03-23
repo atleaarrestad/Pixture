@@ -13,6 +13,14 @@ export class App {
 
     protected readonly activeDialog = this.dialogService.activeDialog;
 
+    protected reservationLinkTitle(displayName: string | null | undefined, url: string): string {
+        return displayName?.trim() || this.reservationLinkHost(url);
+    }
+
+    protected reservationLinkSubtitle(displayName: string | null | undefined, url: string): string {
+        return displayName?.trim() ? this.reservationLinkHost(url) : this.reservationLinkOrigin(url);
+    }
+
     protected reservationLinkHost(url: string): string {
         return this.parseUrl(url)?.hostname.replace(/^www\./, '') ?? url;
     }

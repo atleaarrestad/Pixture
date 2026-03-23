@@ -5,6 +5,8 @@ public sealed record CanvasReservationResponse(
     string Title,
     string OwnerDisplayName,
     string? LinkUrl,
+    string? LinkDisplayName,
+    string? LinkLogoUrl,
     int X,
     int Y,
     int Width,

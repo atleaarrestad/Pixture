@@ -36,6 +36,8 @@ describe('App', () => {
             title: 'Pixel Garden',
             ownerDisplayName: 'Pixture Team',
             linkUrl: 'https://example.com/pixel-garden',
+            linkDisplayName: 'Pixel Garden Studio',
+            linkLogoUrl: 'https://cdn.example.com/pixel-garden-logo.svg',
             x: 0,
             y: 0,
             width: 10,
@@ -49,9 +51,11 @@ describe('App', () => {
         let compiled = fixture.nativeElement as HTMLElement;
         expect(compiled.querySelector('.app-dialog')).toBeTruthy();
         expect(compiled.textContent).toContain('Pixel Garden');
+        expect(compiled.textContent).toContain('Pixel Garden Studio');
         expect(compiled.textContent).toContain('example.com');
-        expect(compiled.textContent).toContain('https://example.com');
-        expect(compiled.querySelector('.app-dialog__link-badge')?.textContent?.trim()).toBe('E');
+        expect(compiled.querySelector('.app-dialog__link-logo')?.getAttribute('src')).toBe(
+            'https://cdn.example.com/pixel-garden-logo.svg',
+        );
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         fixture.detectChanges();

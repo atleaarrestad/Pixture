@@ -60,16 +60,26 @@
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                <span class="app-dialog__link-badge">
-                                    {{ reservationLinkBadge(dialog.reservation.linkUrl) }}
-                                </span>
+                                @if (dialog.reservation.linkLogoUrl) {
+                                    <span class="app-dialog__link-logo-shell">
+                                        <img
+                                            [src]="dialog.reservation.linkLogoUrl"
+                                            [alt]="reservationLinkTitle(dialog.reservation.linkDisplayName, dialog.reservation.linkUrl) + ' logo'"
+                                            class="app-dialog__link-logo"
+                                        />
+                                    </span>
+                                } @else {
+                                    <span class="app-dialog__link-badge">
+                                        {{ reservationLinkBadge(dialog.reservation.linkUrl) }}
+                                    </span>
+                                }
 
                                 <span class="app-dialog__link-copy">
                                     <span class="app-dialog__link-host">
-                                        {{ reservationLinkHost(dialog.reservation.linkUrl) }}
+                                        {{ reservationLinkTitle(dialog.reservation.linkDisplayName, dialog.reservation.linkUrl) }}
                                     </span>
                                     <span class="app-dialog__link-url">
-                                        {{ reservationLinkOrigin(dialog.reservation.linkUrl) }}
+                                        {{ reservationLinkSubtitle(dialog.reservation.linkDisplayName, dialog.reservation.linkUrl) }}
                                     </span>
                                 </span>
 

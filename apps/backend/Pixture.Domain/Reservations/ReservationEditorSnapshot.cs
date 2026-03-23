@@ -5,6 +5,8 @@ public sealed record ReservationEditorSnapshot(
     string Title,
     string OwnerDisplayName,
     string? LinkUrl,
+    string? LinkDisplayName,
+    string? LinkLogoUrl,
     int CanvasWidth,
     int CanvasHeight,
     int X,

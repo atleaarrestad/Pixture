@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pixture.Api.Infrastructure;
 using Pixture.Api.Models;
 using Pixture.Api.Services;
 using Pixture.Domain.Reservations;
@@ -23,6 +24,8 @@ public sealed class ReservationsController(ICanvasBoardService canvasBoardServic
             editor.Title,
             editor.OwnerDisplayName,
             editor.LinkUrl,
+            editor.LinkDisplayName,
+            Request.ToAbsoluteUrlOrNull(editor.LinkLogoUrl),
             editor.CanvasWidth,
             editor.CanvasHeight,
             editor.X,

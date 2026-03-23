@@ -28,6 +28,7 @@ if (app.Environment.IsDevelopment())
     app.UseCors(FrontendDevCorsPolicy);
 }
 
+app.UseStaticFiles();
 app.UseAuthorization();
 
 app.MapControllers();

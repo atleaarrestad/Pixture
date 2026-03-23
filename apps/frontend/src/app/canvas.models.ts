@@ -12,6 +12,8 @@ export interface CanvasReservation {
     title: string;
     ownerDisplayName: string;
     linkUrl?: string | null;
+    linkDisplayName?: string | null;
+    linkLogoUrl?: string | null;
     x: number;
     y: number;
     width: number;
@@ -25,6 +27,8 @@ export interface ReservationEditorData {
     title: string;
     ownerDisplayName: string;
     linkUrl?: string | null;
+    linkDisplayName?: string | null;
+    linkLogoUrl?: string | null;
     canvasWidth: number;
     canvasHeight: number;
     x: number;
