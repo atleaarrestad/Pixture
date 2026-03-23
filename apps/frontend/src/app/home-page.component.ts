@@ -1,29 +1,29 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CanvasApiService } from './canvas-api.service';
 import { CanvasReservation, CanvasSummary } from './canvas.models';
+import { DialogService } from './dialog.service';
 import { UiCardComponent } from './ui/ui-card.component';
 import { UiSpinnerComponent } from './ui/ui-spinner.component';
 
 @Component({
     selector: 'app-home-page',
-    imports: [RouterLink, UiCardComponent, UiSpinnerComponent],
+    imports: [UiCardComponent, UiSpinnerComponent],
     templateUrl: './home-page.component.html',
     styleUrl: './home-page.component.scss',
 })
 export class HomePageComponent {
     private readonly canvasApi = inject(CanvasApiService);
+    private readonly dialogService = inject(DialogService);
 
     protected readonly canvas = signal<CanvasSummary | null>(null);
     protected readonly reservations = signal<CanvasReservation[]>([]);
     protected readonly hoveredReservationId = signal<string | null>(null);
-    protected readonly selectedReservationId = signal<string | null>(null);
     protected readonly isLoading = signal(true);
     protected readonly loadError = signal<string | null>(null);
-    protected readonly selectedReservation = computed(() => {
-        const selectedId = this.selectedReservationId() ?? this.hoveredReservationId();
-        return this.reservations().find(reservation => reservation.reservationId === selectedId) ?? null;
+    protected readonly activeReservation = computed(() => {
+        const hoveredId = this.hoveredReservationId();
+        return this.reservations().find(reservation => reservation.reservationId === hoveredId) ?? null;
     });
     protected readonly imageUrl = computed(() => {
         const canvas = this.canvas();
@@ -58,16 +58,12 @@ export class HomePageComponent {
         this.hoveredReservationId.set(reservationId);
     }
 
-    protected selectReservation(reservationId: string): void {
-        this.selectedReservationId.set(reservationId);
-    }
-
-    protected editorRoute(reservation: CanvasReservation): string {
-        return `/reservations/${reservation.reservationId}/edit`;
-    }
-
     protected hasExternalLink(reservation: CanvasReservation): boolean {
         return !!reservation.linkUrl;
+    }
+
+    protected openReservationDetails(reservation: CanvasReservation): void {
+        this.dialogService.openReservationDetails(reservation);
     }
 
     private async loadBoard(): Promise<void> {
@@ -79,7 +75,6 @@ export class HomePageComponent {
 
             this.canvas.set(canvas);
             this.reservations.set(reservations);
-            this.selectedReservationId.set(reservations[0]?.reservationId ?? null);
         } catch {
             this.loadError.set('Could not load the public board yet.');
         } finally {

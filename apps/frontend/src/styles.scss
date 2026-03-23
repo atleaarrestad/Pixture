@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
 
 html {
+    height: 100%;
     font-size: 16px;
 }
 
@@ -13,7 +14,9 @@ html {
 }
 
 body {
+    height: 100%;
     margin: 0;
+    overflow: hidden;
     font-family: var(--font-family-base);
     color: var(--token-text-primary);
     background-color: var(--token-bg-app);

@@ -23,5 +23,50 @@
         </div>
     </header>
 
-    <router-outlet />
+    <main class="app-shell__content">
+        <router-outlet />
+    </main>
+
+    @if (activeDialog(); as dialog) {
+        <div class="app-dialog-layer" (click)="closeDialog()">
+            <section
+                class="app-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="app-dialog-title"
+                (click)="$event.stopPropagation()"
+            >
+                <button
+                    type="button"
+                    class="app-dialog__close"
+                    aria-label="Close dialog"
+                    (click)="closeDialog()"
+                >
+                    ×
+                </button>
+
+                @if (dialog.kind === 'reservation-details') {
+                    <div class="app-dialog__content">
+                        <h2 id="app-dialog-title">{{ dialog.reservation.title }}</h2>
+                        <p class="app-dialog__subtitle">
+                            Owned by {{ dialog.reservation.ownerDisplayName }}
+                        </p>
+
+                        @if (dialog.reservation.linkUrl) {
+                            <a
+                                [href]="dialog.reservation.linkUrl"
+                                class="app-dialog__link-card"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                <span class="app-dialog__link-url">{{ dialog.reservation.linkUrl }}</span>
+                            </a>
+                        } @else {
+                            <p class="app-dialog__muted">No public link available</p>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    }
 </div>
