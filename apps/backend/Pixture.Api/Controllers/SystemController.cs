@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pixture.Api.Models;
 
 namespace Pixture.Api.Controllers;
 
@@ -15,8 +16,3 @@ public sealed class SystemController(IHostEnvironment hostEnvironment) : Control
             DateTimeOffset.UtcNow));
     }
 }
-
-public sealed record SystemInfoResponse(
-    string Service,
-    string Environment,
-    DateTimeOffset UtcNow);

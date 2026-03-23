@@ -2,5 +2,6 @@
   <Folder Name="/apps/" />
   <Folder Name="/apps/backend/">
     <Project Path="apps/backend/Pixture.Api/Pixture.Api.csproj" />
+    <Project Path="apps/backend/Pixture.Domain/Pixture.Domain.csproj" />
   </Folder>
 </Solution>

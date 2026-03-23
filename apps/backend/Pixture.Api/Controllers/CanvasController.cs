@@ -26,7 +26,21 @@ public sealed class CanvasController(ICanvasBoardService canvasBoardService) : C
     [HttpGet("reservations")]
     public ActionResult<IReadOnlyList<CanvasReservationResponse>> GetReservations()
     {
-        return Ok(canvasBoardService.GetReservations());
+        var reservations = canvasBoardService.GetReservations()
+            .Select(reservation => new CanvasReservationResponse(
+                reservation.Id,
+                reservation.Title,
+                reservation.OwnerDisplayName,
+                reservation.LinkUrl,
+                reservation.X,
+                reservation.Y,
+                reservation.Width,
+                reservation.Height,
+                reservation.AccentColor,
+                true))
+            .ToArray();
+
+        return Ok(reservations);
     }
 
     [HttpGet("image")]

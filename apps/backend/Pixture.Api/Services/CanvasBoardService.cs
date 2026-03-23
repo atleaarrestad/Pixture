@@ -1,19 +1,9 @@
-using Pixture.Api.Models;
+using Pixture.Domain.Canvas;
+using Pixture.Domain.Reservations;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Pixture.Api.Services;
-
-public interface ICanvasBoardService
-{
-    CanvasSummarySnapshot GetCanvasSummary();
-    IReadOnlyList<CanvasReservationResponse> GetReservations();
-    byte[] GetRenderedCanvasPng();
-    ReservationEditorResponse? GetReservationEditor(Guid reservationId);
-    UpdateReservationPixelsResponse? UpdateReservationPixels(
-        Guid reservationId,
-        UpdateReservationPixelsRequest request);
-}
 
 public sealed class CanvasBoardService : ICanvasBoardService
 {
@@ -23,8 +13,8 @@ public sealed class CanvasBoardService : ICanvasBoardService
     private const int PublicRenderScale = 5;
 
     private readonly object syncRoot = new();
-    private readonly List<ReservationRecord> reservations;
-    private readonly Dictionary<Guid, string[]> reservationPixels;
+    private readonly List<Reservation> reservations;
+    private readonly Dictionary<Guid, ReservationPixelLayer> reservationLayers;
 
     private int renderVersion = 1;
     private DateTimeOffset updatedAt = DateTimeOffset.UtcNow;
@@ -33,7 +23,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
     {
         reservations =
         [
-            new ReservationRecord(
+            new Reservation(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A001"),
                 "North launch banner",
                 "Atle",
@@ -43,7 +33,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 50,
                 50,
                 "#b9b2ff"),
-            new ReservationRecord(
+            new Reservation(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A002"),
                 "Skyline teaser",
                 "Mia",
@@ -53,7 +43,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 30,
                 10,
                 "#8ed8f8"),
-            new ReservationRecord(
+            new Reservation(
                 Guid.Parse("9A648CB8-8B30-42AE-B917-F91C20A1A003"),
                 "Footer callout",
                 "Noah",
@@ -67,9 +57,9 @@ public sealed class CanvasBoardService : ICanvasBoardService
 
         ValidateSeedReservations(reservations);
 
-        reservationPixels = reservations.ToDictionary(
+        reservationLayers = reservations.ToDictionary(
             reservation => reservation.Id,
-            CreateInitialPixels);
+            CreateInitialPixelLayer);
     }
 
     public CanvasSummarySnapshot GetCanvasSummary()
@@ -85,23 +75,11 @@ public sealed class CanvasBoardService : ICanvasBoardService
         }
     }
 
-    public IReadOnlyList<CanvasReservationResponse> GetReservations()
+    public IReadOnlyList<Reservation> GetReservations()
     {
         lock (syncRoot)
         {
-            return reservations
-                .Select(reservation => new CanvasReservationResponse(
-                    reservation.Id,
-                    reservation.Title,
-                    reservation.OwnerDisplayName,
-                    reservation.LinkUrl,
-                    reservation.X,
-                    reservation.Y,
-                    reservation.Width,
-                    reservation.Height,
-                    reservation.AccentColor,
-                    true))
-                .ToArray();
+            return reservations.ToArray();
         }
     }
 
@@ -137,7 +115,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
         }
     }
 
-    public ReservationEditorResponse? GetReservationEditor(Guid reservationId)
+    public ReservationEditorSnapshot? GetReservationEditor(Guid reservationId)
     {
         lock (syncRoot)
         {
@@ -147,7 +125,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 return null;
             }
 
-            return new ReservationEditorResponse(
+            return new ReservationEditorSnapshot(
                 reservation.Id,
                 reservation.Title,
                 reservation.OwnerDisplayName,
@@ -159,13 +137,13 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 reservation.Width,
                 reservation.Height,
                 $"v{renderVersion}",
-                reservationPixels[reservation.Id].ToArray());
+                reservationLayers[reservation.Id].Pixels.ToArray());
         }
     }
 
-    public UpdateReservationPixelsResponse? UpdateReservationPixels(
+    public ReservationUpdateResult? UpdateReservationPixels(
         Guid reservationId,
-        UpdateReservationPixelsRequest request)
+        UpdateReservationPixelsCommand command)
     {
         lock (syncRoot)
         {
@@ -175,22 +153,22 @@ public sealed class CanvasBoardService : ICanvasBoardService
                 return null;
             }
 
-            var normalizedLinkUrl = NormalizeLinkUrl(request.LinkUrl);
-            reservation.LinkUrl = normalizedLinkUrl;
+            var normalizedLinkUrl = NormalizeLinkUrl(command.LinkUrl);
+            reservation.SetLinkUrl(normalizedLinkUrl);
 
-            var pixels = reservationPixels[reservationId];
+            var pixels = reservationLayers[reservationId].Pixels;
             var appliedChanges = 0;
 
-            foreach (var change in request.Changes)
+            foreach (var change in command.Changes)
             {
                 if (change.X < 0 || change.X >= reservation.Width || change.Y < 0 || change.Y >= reservation.Height)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(request), "Pixel change lies outside the reservation bounds.");
+                    throw new ArgumentOutOfRangeException(nameof(command), "Pixel change lies outside the reservation bounds.");
                 }
 
                 if (!IsValidColor(change.ColorHex))
                 {
-                    throw new ArgumentException($"Invalid color '{change.ColorHex}'. Use #RRGGBB.", nameof(request));
+                    throw new ArgumentException($"Invalid color '{change.ColorHex}'. Use #RRGGBB.", nameof(command));
                 }
 
                 var pixelIndex = (change.Y * reservation.Width) + change.X;
@@ -201,7 +179,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
             renderVersion++;
             updatedAt = DateTimeOffset.UtcNow;
 
-            return new UpdateReservationPixelsResponse(
+            return new ReservationUpdateResult(
                 reservationId,
                 $"v{renderVersion}",
                 updatedAt,
@@ -216,7 +194,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
 
         foreach (var reservation in reservations)
         {
-            var layer = reservationPixels[reservation.Id];
+            var layer = reservationLayers[reservation.Id].Pixels;
 
             for (var localY = 0; localY < reservation.Height; localY++)
             {
@@ -232,7 +210,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
         return pixels;
     }
 
-    private static string[] CreateInitialPixels(ReservationRecord reservation)
+    private static ReservationPixelLayer CreateInitialPixelLayer(Reservation reservation)
     {
         var pixels = new string[reservation.Width * reservation.Height];
 
@@ -251,7 +229,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
             }
         }
 
-        return pixels;
+        return new ReservationPixelLayer(reservation.Id, pixels);
     }
 
     private static bool IsValidColor(string colorHex)
@@ -292,7 +270,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
         return parsedUri.ToString();
     }
 
-    private static void ValidateSeedReservations(IEnumerable<ReservationRecord> seededReservations)
+    private static void ValidateSeedReservations(IEnumerable<Reservation> seededReservations)
     {
         var reservationList = seededReservations.ToArray();
 
@@ -314,7 +292,7 @@ public sealed class CanvasBoardService : ICanvasBoardService
         }
     }
 
-    private static void EnsureReservationFitsGrid(ReservationRecord reservation)
+    private static void EnsureReservationFitsGrid(Reservation reservation)
     {
         if (reservation.Width < ReservationGridSize || reservation.Height < ReservationGridSize)
         {
@@ -346,40 +324,11 @@ public sealed class CanvasBoardService : ICanvasBoardService
         return value % ReservationGridSize == 0;
     }
 
-    private static bool ReservationsOverlap(ReservationRecord left, ReservationRecord right)
+    private static bool ReservationsOverlap(Reservation left, Reservation right)
     {
         return left.X < right.X + right.Width
             && left.X + left.Width > right.X
             && left.Y < right.Y + right.Height
             && left.Y + left.Height > right.Y;
     }
-
-    private sealed class ReservationRecord(
-        Guid id,
-        string title,
-        string ownerDisplayName,
-        string? linkUrl,
-        int x,
-        int y,
-        int width,
-        int height,
-        string accentColor)
-    {
-        public Guid Id { get; } = id;
-        public string Title { get; } = title;
-        public string OwnerDisplayName { get; } = ownerDisplayName;
-        public string? LinkUrl { get; set; } = linkUrl;
-        public int X { get; } = x;
-        public int Y { get; } = y;
-        public int Width { get; } = width;
-        public int Height { get; } = height;
-        public string AccentColor { get; } = accentColor;
-    }
 }
-
-public sealed record CanvasSummarySnapshot(
-    int Width,
-    int Height,
-    string RenderVersion,
-    DateTimeOffset UpdatedAt,
-    int ReservationCount);
