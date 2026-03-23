@@ -13,6 +13,20 @@ export class App {
 
     protected readonly activeDialog = this.dialogService.activeDialog;
 
+    protected reservationLinkHost(url: string): string {
+        return this.parseUrl(url)?.hostname.replace(/^www\./, '') ?? url;
+    }
+
+    protected reservationLinkOrigin(url: string): string {
+        const parsedUrl = this.parseUrl(url);
+        return parsedUrl ? `${parsedUrl.protocol}//${parsedUrl.hostname}` : url;
+    }
+
+    protected reservationLinkBadge(url: string): string {
+        const host = this.reservationLinkHost(url);
+        return host.slice(0, 1).toUpperCase();
+    }
+
     protected closeDialog(): void {
         this.dialogService.close();
     }
@@ -21,6 +35,14 @@ export class App {
     protected handleEscape(): void {
         if (this.activeDialog()) {
             this.closeDialog();
+        }
+    }
+
+    private parseUrl(url: string): URL | null {
+        try {
+            return new URL(url);
+        } catch {
+            return null;
         }
     }
 }

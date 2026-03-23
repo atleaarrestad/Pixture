@@ -49,7 +49,9 @@ describe('App', () => {
         let compiled = fixture.nativeElement as HTMLElement;
         expect(compiled.querySelector('.app-dialog')).toBeTruthy();
         expect(compiled.textContent).toContain('Pixel Garden');
-        expect(compiled.textContent).toContain('https://example.com/pixel-garden');
+        expect(compiled.textContent).toContain('example.com');
+        expect(compiled.textContent).toContain('https://example.com');
+        expect(compiled.querySelector('.app-dialog__link-badge')?.textContent?.trim()).toBe('E');
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         fixture.detectChanges();

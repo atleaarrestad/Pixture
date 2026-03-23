@@ -56,10 +56,24 @@
                             <a
                                 [href]="dialog.reservation.linkUrl"
                                 class="app-dialog__link-card"
+                                [style.--dialog-accent]="dialog.reservation.accentColor"
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                <span class="app-dialog__link-url">{{ dialog.reservation.linkUrl }}</span>
+                                <span class="app-dialog__link-badge">
+                                    {{ reservationLinkBadge(dialog.reservation.linkUrl) }}
+                                </span>
+
+                                <span class="app-dialog__link-copy">
+                                    <span class="app-dialog__link-host">
+                                        {{ reservationLinkHost(dialog.reservation.linkUrl) }}
+                                    </span>
+                                    <span class="app-dialog__link-url">
+                                        {{ reservationLinkOrigin(dialog.reservation.linkUrl) }}
+                                    </span>
+                                </span>
+
+                                <span class="app-dialog__link-arrow" aria-hidden="true">↗</span>
                             </a>
                         } @else {
                             <p class="app-dialog__muted">No public link available</p>
